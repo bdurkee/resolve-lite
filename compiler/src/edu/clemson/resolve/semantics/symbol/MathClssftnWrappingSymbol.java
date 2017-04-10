@@ -1,6 +1,6 @@
 package edu.clemson.resolve.semantics.symbol;
 
-import edu.clemson.resolve.semantics.MathClassification;
+import edu.clemson.resolve.semantics.MathClssftn;
 import edu.clemson.resolve.semantics.ModuleIdentifier;
 import edu.clemson.resolve.semantics.Quantification;
 import org.jetbrains.annotations.NotNull;
@@ -13,40 +13,59 @@ import java.util.*;
 
 public class MathClssftnWrappingSymbol extends Symbol {
 
-    private MathClassification classification;
+    private MathClssftn classification;
     private final DumbMathClssftnHandler g;
     private final Quantification q;
 
+    /**
+     * An operator is "chainable" if it's a relational operator that can be written in the following
+     * form x OP y OP z where OP returns a boolean (B). This can then be (internally) interpreted as x OP y and y OP z.
+     */
+    private final boolean chainable;
+
     public MathClssftnWrappingSymbol(@NotNull DumbMathClssftnHandler g, @NotNull String name,
-                                     @NotNull MathClassification classification) {
-        this(g, name, Quantification.NONE, classification, null,
-                ModuleIdentifier.GLOBAL);
+                                     @NotNull MathClssftn classification) {
+        this(g, name, Quantification.NONE, classification, null, false, ModuleIdentifier.GLOBAL);
     }
 
     public MathClssftnWrappingSymbol(@NotNull DumbMathClssftnHandler g, @NotNull String name,
-                                     @NotNull MathClassification classification,
+                                     @NotNull MathClssftn classification, boolean chainableOperator) {
+        this(g, name, Quantification.NONE, classification, null, chainableOperator, ModuleIdentifier.GLOBAL);
+    }
+
+    public MathClssftnWrappingSymbol(@NotNull DumbMathClssftnHandler g, @NotNull String name,
+                                     @NotNull MathClssftn classification,
                                      @Nullable ParserRuleContext definingTree,
                                      @NotNull ModuleIdentifier moduleIdentifier) {
-        this(g, name, Quantification.NONE, classification, definingTree,
-                moduleIdentifier);
+        this(g, name, Quantification.NONE, classification, definingTree, false, moduleIdentifier);
     }
 
     public MathClssftnWrappingSymbol(@NotNull DumbMathClssftnHandler g, @NotNull String name,
                                      @NotNull Quantification q,
-                                     @NotNull MathClassification classification,
+                                     @NotNull MathClssftn classification,
                                      @Nullable ParserRuleContext definingTree,
+                                     @NotNull ModuleIdentifier moduleIdentifier) {
+        this(g, name, q, classification, definingTree, false, moduleIdentifier);
+    }
+
+    public MathClssftnWrappingSymbol(@NotNull DumbMathClssftnHandler g, @NotNull String name,
+                                     @NotNull Quantification q,
+                                     @NotNull MathClssftn classification,
+                                     @Nullable ParserRuleContext definingTree,
+                                     boolean chainableOperator,
                                      @NotNull ModuleIdentifier moduleIdentifier) {
         super(name, definingTree, moduleIdentifier);
         this.classification = classification;
+        this.chainable = chainableOperator;
         this.g = g;
         this.q = q;
     }
 
-    public void setClassification(MathClassification n) {
+    public void setClassification(MathClssftn n) {
         this.classification = n;
     }
 
-    public MathClassification getClassification() {
+    public MathClssftn getClassification() {
         return classification;
     }
 
@@ -54,10 +73,14 @@ public class MathClssftnWrappingSymbol extends Symbol {
         return q;
     }
 
+    public boolean isChainable() {
+        return chainable;
+    }
+
     @NotNull
     @Override
     public String getSymbolDescription() {
-        return "a math symbol";
+        return "a mathFor symbol";
     }
 
     @NotNull
@@ -75,15 +98,15 @@ public class MathClssftnWrappingSymbol extends Symbol {
             genericInstantiations.remove(schematicType);
         }*/
 
-        Map<String, MathClassification> genericMathematicalInstantiations =
+        Map<String, MathClssftn> genericMathematicalInstantiations =
                 Symbol.buildMathTypeGenerics(genericInstantiations);
 
         if (genericInstantiations.isEmpty()) return this;
-        MathClassification instEncClssftn =
+        MathClssftn instEncClssftn =
                 classification.enclosingClassification
                         .withVariablesSubstituted(
                                 genericMathematicalInstantiations);
-        MathClassification instClssftn =
+        MathClssftn instClssftn =
                 classification
                         .withVariablesSubstituted(
                                 genericMathematicalInstantiations);
@@ -109,7 +132,7 @@ public class MathClssftnWrappingSymbol extends Symbol {
                 genericInstantiations.keySet());
 */
         return new MathClssftnWrappingSymbol(g, getName(),
-                getQuantification(), instClssftn, getDefiningTree(),
+                getQuantification(), instClssftn, getDefiningTree(), chainable,
                 getModuleIdentifier());
     }
 

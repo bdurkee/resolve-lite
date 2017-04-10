@@ -1,0 +1,31 @@
+Concept Char_Str_Template;
+    uses Natural_Number_Theory, Standard_Booleans,
+         Standard_Integers,
+         String_Theory;
+
+    Definition Max_Len : ℕ;
+    constraints 1 ≤ Max_Len;
+    
+    Type family Char_Str is modeled by Str(ℕ);
+        exemplar S;
+        constraints |S| ≤ Max_Len;
+        initialization
+                ensures S = Λ; 
+
+    //Operation Merge (evaluates s1, s2 : Char_Str) : Char_Str;
+    //    ensures Merge = (s1 ∘ s2);
+
+    Operation Length (evaluates s : Char_Str) : Integer;
+        ensures Length = (|s|);
+
+    Operation Are_Equal (evaluates s1, s2 : Char_Str) : Boolean;
+        ensures Are_Equal = (s1 = s2);
+
+    Operation Are_Not_Equal (evaluates s1, s2 : Char_Str) : Boolean;
+        ensures Are_Not_Equal = (s1 ≠ s2);
+
+    Operation Write (evaluates s : Char_Str);
+
+    Operation Write_Line (evaluates s : Char_Str);
+
+end Char_Str_Template;

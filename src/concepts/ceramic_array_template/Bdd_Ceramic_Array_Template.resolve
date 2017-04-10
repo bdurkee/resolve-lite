@@ -1,0 +1,22 @@
+Concept Bdd_Ceramic_Array_Template (type Entry;
+        evaluates Lower_Bound,
+                  Upper_Bound : Std_Ints :: Integer);
+    uses Standard_Integers,
+         Basic_Integer_Theory;
+    requires Lower_Bound ≤ Upper_Bound;
+
+    Type family Ceramic_Array
+            is modeled by ℤ ⟶ Entry;
+        exemplar A;
+        initialization
+            ensures ∀ i : ℤ,
+                Entry.Is_Initial(A(i));
+
+    Operation Swap_Entry (updates A : Ceramic_Array;
+                          updates x : Entry;
+                          evaluates i : Std_Ints :: Integer);
+        requires Lower_Bound ≤ i ≤ Upper_Bound;
+        ensures x = #A(i) ∧ (A = λ j : ℤ,
+                               {{#x     if j = i;
+                                 #A(i)  otherwise;}});
+end Bdd_Ceramic_Array_Template;

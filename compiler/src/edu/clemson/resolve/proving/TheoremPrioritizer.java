@@ -18,7 +18,7 @@ import java.util.*;
  * Created by nabilkabbani on 12/10/14.
  */
 public class TheoremPrioritizer {
-/*
+
     protected PriorityQueue<TheoremWithScore> m_pQueue;
     private Map<String, Integer> m_theoremAppliedCount;
     private Registry m_vcReg;
@@ -27,10 +27,10 @@ public class TheoremPrioritizer {
     private Set<TheoremCongruenceClosureImpl> m_smallEndEquations;
 
     public TheoremPrioritizer(List<TheoremCongruenceClosureImpl> theoremList,
-            Map<String, Integer> appliedCount,
-            VerificationConditionCongruenceClosureImpl vc,
-            Set<String> nonQuantifiedTheoremSymbols,
-            Set<TheoremCongruenceClosureImpl> smallEndEquations) {
+                              Map<String, Integer> appliedCount,
+                              VerificationConditionCongruenceClosureImpl vc,
+                              Set<String> nonQuantifiedTheoremSymbols,
+                              Set<TheoremCongruenceClosureImpl> smallEndEquations) {
         m_pQueue = new PriorityQueue<TheoremWithScore>(theoremList.size());
         m_theoremAppliedCount = appliedCount;
         m_vcReg = vc.getRegistry();
@@ -48,6 +48,8 @@ public class TheoremPrioritizer {
             //int score = calculateScore(t.getFunctionNames());
             int score;
             //if (!shouldExclude(t.getFunctionNames())) {
+            Set<String> unQuantSyms = t.getNonQuantifiedSymbols();
+            //VC #1 in my system corresponds to VC 0_3 in the old system (for my minimal int do_nothing example anyways..)
             if (!shouldExclude(t.getNonQuantifiedSymbols())) {
                 score =
                         calculateScoreMinimum(t.getNonQuantifiedSymbols(),
@@ -76,7 +78,7 @@ public class TheoremPrioritizer {
 
     //  minimum of symbol scores in both vc and theorem
     public int calculateScoreMinimum(Set<String> theorem_symbols,
-            int not_contained_penalty) {
+                                     int not_contained_penalty) {
         if (theorem_symbols.isEmpty())
             return 0;
         int score = not_contained_penalty;
@@ -117,5 +119,4 @@ public class TheoremPrioritizer {
     public TheoremCongruenceClosureImpl poll() {
         return m_pQueue.poll().m_theorem;
     }
-*/
 }

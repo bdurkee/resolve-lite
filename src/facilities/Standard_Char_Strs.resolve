@@ -1,0 +1,6 @@
+Facility Standard_Char_Strs;
+
+    Facility Std_Strs is Char_Str_Template
+        externally
+            realized by Standard_Char_Str_Realiz;
+end Standard_Char_Strs;

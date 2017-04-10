@@ -1,10 +1,11 @@
 # Formal Specification Languages
 
-## Describing the world
+## Basics
 
-Software systems are typically embedded in environments that can be arbitrarily strange and complex. In order to make a
-proposed software system work properly, it is necessary at a minimum to determine which aspects of its environment
-are relevant to its operation. A formal model of the environment can then be constructed and combined with a formal
-model of the proposed software to determine whether the software would interact with its environment to produce
-desirable behavior.
+We can also view Lean as a suite of tools for evaluating and processing expressions representing terms, definitions, and theorems.
+
+Every expression has a unique type in Lean. The command check returns the type of a given expression.
+
+
+<img src="https://github.com/dtwelch/resolve-lite/blob/dev/doc/tpcods/code_blocks/01.png" width="900">
 

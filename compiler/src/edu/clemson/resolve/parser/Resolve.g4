@@ -1,44 +1,13 @@
-/*
- * [The "BSD license"]
- * Copyright (c) 2015 Clemson University
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- *
- * 1. Redistributions of source code must retain the above copyright
- * notice, this list of conditions and the following disclaimer.
- *
- * 2. Redistributions in binary form must reproduce the above copyright
- * notice, this list of conditions and the following disclaimer in the
- * documentation and/or other nterials provided with the distribution.
- *
- * 3. The name of the author may not be used to endorse or promote products
- * derived from this software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
- * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
- * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
- * IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
- * NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
- * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
- * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
- * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
 grammar Resolve;
 
 moduleDecl
     :   (precisModuleDecl
     |   precisExtModuleDecl
-    |   conceptExtModuleDecl
+    |   enhancementModuleDecl
     |   conceptModuleDecl
-    |   conceptImplModuleDecl
-    |   conceptExtImplModuleDecl
-    |   facilityModuleDecl
-    |   shortFacilityModuleDecl) EOF
+    |   conceptRealizationModuleDecl
+    |   enhancementRealizationModuleDecl
+    |   facilityModuleDecl) EOF
     ;
 
 precisModuleDecl
@@ -49,8 +18,9 @@ precisModuleDecl
     ;
 
 precisExtModuleDecl
-    :   'Precis' 'Extension' name=ID 'for' precis=ID
+    :   'Extension' name=ID 'for' precis=ID
         ('with' precisExt=ID)? ';'
+        (usesList)?
         precisBlock
         'end' closename=ID ';'
     ;
@@ -63,24 +33,24 @@ conceptModuleDecl
         'end' closename=ID ';'
     ;
 
-conceptExtModuleDecl
-    :   'Concept' 'Extension' name=ID specModuleParameterList?
+enhancementModuleDecl
+    :   'Enhancement' name=ID specModuleParameterList?
         'for' concept=ID ';'
         (usesList)?
         conceptBlock
         'end' closename=ID ';'
     ;
 
-conceptImplModuleDecl
-    :   'Implementation' name=ID implModuleParameterList?
+conceptRealizationModuleDecl
+    :   'Realization' name=ID realizModuleParameterList?
         'for' concept=ID ';'
         (usesList)?
         implBlock
         'end' closename=ID ';'
     ;
 
-conceptExtImplModuleDecl
-    :   'Implementation' name=ID implModuleParameterList?
+enhancementRealizationModuleDecl
+    :   'Realization' name=ID realizModuleParameterList?
         'for' extension=ID 'of' concept=ID ';'
         (usesList)?
         implBlock
@@ -95,21 +65,19 @@ facilityModuleDecl
         'end' closename=ID ';'
     ;
 
-shortFacilityModuleDecl
-    :   facilityDecl
-    ;
-
 // uses, imports
 
 usesList
-    :   'uses' usesSpec (',' usesSpec)* ';'
-    |   'uses' '(' usesSpec (',' usesSpec)* ')' ';'
+    :   'uses' (usesSpecs|'(' usesSpecs ')') ';'
     ;
 
-usesSpec : id=ID fromClauseSpec? alias? ;
-fromClauseSpec : 'from' qualifiedFromPath ;
-qualifiedFromPath : ID ('.' ID)*;
-alias : 'as' ID ;
+usesSpecs
+    :   moduleIdentifierSpec (',' moduleIdentifierSpec)*
+    ;
+
+moduleIdentifierSpec : id=ID fromClause?;
+fromClause : 'from' moduleLibraryIdentifier ;
+moduleLibraryIdentifier : ID ('.' ID)* ;
 
 // module blocks & items
 
@@ -118,7 +86,7 @@ precisBlock
         | mathCategoricalDefnDecl
         | mathInductiveDefnDecl
         | mathTheoremDecl
-        | mathClssftnTheoremDecl
+        | mathClssftnAssertionDecl
         )*
     ;
 
@@ -135,6 +103,7 @@ implBlock
         | procedureDecl
         | typeRepresentationDecl
         | facilityDecl
+        | mathStandardDefnDecl
         )*
     ;
 
@@ -142,14 +111,15 @@ facilityBlock
     :   ( facilityDecl
         | operationProcedureDecl
         | typeRepresentationDecl
+        | mathStandardDefnDecl
         )*
     ;
 
 // type refs & decls
 
 type
-    :   (qualifier=ID '.')? name=ID           #namedType
-    |    'Record' (recordVarDeclGroup)* 'end'  #recordType
+    :   (qualifier=ID '::')? name=ID            #namedType
+    |    'Record' (recordVarDeclGroup)* 'end'   #recordType
     ;
 
 typeModelDecl
@@ -160,7 +130,7 @@ typeModelDecl
     ;
 
 typeRepresentationDecl
-    :   'Type' name=ID '=' type ';'?
+    :   'Type' name=ID 'is' type ';'?
         (conventionsClause)?
         (correspondenceClause)?
         (typeImplInit)?
@@ -174,7 +144,7 @@ specModuleInit
 
 typeImplInit
     :   'initialization'
-        (varDeclGroup)* //(stmt)*
+        (varDeclGroup)* (stmt)*
         'end' ';'
     ;
 
@@ -184,8 +154,8 @@ specModuleParameterList
     :   '(' specModuleParameterDecl (';' specModuleParameterDecl)* ')'
     ;
 
-implModuleParameterList
-    :   '(' implModuleParameterDecl (';' implModuleParameterDecl)* ')'
+realizModuleParameterList
+    :   '(' realizModuleParameterDecl (';' realizModuleParameterDecl)* ')'
     ;
 
 operationParameterList
@@ -198,9 +168,9 @@ specModuleParameterDecl
     |   genericTypeParameterDecl
     ;
 
-implModuleParameterDecl
+realizModuleParameterDecl
     :   parameterDeclGroup
-   // |   operationDecl
+    |   operationDecl
     ;
 
 parameterDeclGroup
@@ -230,31 +200,44 @@ recordVarDeclGroup
     ;
 
 varDeclGroup
-    :   'Var' ID (',' ID)* ':' type ';'?
+    :   'Var' ID (',' ID)* ':' type ';'
     ;
 
 // facility decls
 
 facilityDecl
-    :   'Facility' name=ID 'is' spec=ID (specArgs=moduleArgumentList)? specFrom=fromClauseSpec?
-        (externally='externally')? 'implemented' 'by' impl=ID implFrom=fromClauseSpec?
-        (implArgs=moduleArgumentList)? (extensionPairing)* ';'?
+    :   'Facility' name=ID 'is' spec=ID (specArgs=specModuleArgumentList)? specFrom=fromClause?
+        (externally='externally')? 'realized' 'by' realiz=ID
+        (realizArgs=realizModuleArgumentList)? realizFrom=fromClause?
+        (enhancementPairing)* ';'
     ;
 
-extensionPairing
-    :   'extended' 'by' spec=ID (specArgs=moduleArgumentList)?
-        (externally='externally')? 'implemented' 'by' impl=ID
-        (implArgs=moduleArgumentList)?
+enhancementPairing
+    :   'enhanced' 'by' spec=ID (specArgs=specModuleArgumentList)? specFrom=fromClause?
+        (externally='externally')? 'realized' 'by' realiz=ID
+        (realizArgs=realizModuleArgumentList)? realizFrom=fromClause?
     ;
 
-moduleArgumentList
+realizModuleArgumentList
     :   '(' progExp (',' progExp)* ')'
+    ;
+
+specModuleArgumentList
+    :   '(' specModuleArg (',' specModuleArg)* ')'
+    ;
+
+//this is cool, I want to match program expressions FIRST, then if
+//I see a strange glyph (or something involving a strange glyph),
+//THEN we parse the math and carry on as usual.
+specModuleArg
+    :   progExp
+    |   mathExp
     ;
 
 // operations & procedures
 
 operationDecl
-    :   'Operation' name=ID operationParameterList (':' type)? ';'
+    :   'Operation' name=ID alt=progSymbolName? operationParameterList (':' type)? ';'
         (requiresClause)? (ensuresClause)?
     ;
 
@@ -263,6 +246,7 @@ operationProcedureDecl
         (requiresClause)?
         (ensuresClause)?
         (recursive='Recursive')? 'Procedure'
+        decreasingClause?
         (varDeclGroup)*
         (stmt)*
         'end' closename=ID ';'
@@ -271,6 +255,7 @@ operationProcedureDecl
 procedureDecl
     :   (recursive='Recursive')? 'Procedure' name=ID operationParameterList
         (':' type)? ';'
+        //(noticeClause)*
         (varDeclGroup)*
         (stmt)*
         'end' closename=ID ';'
@@ -283,16 +268,18 @@ stmt
     |   swapStmt
     |   callStmt
     |   whileStmt
+    |   noticeStmt
     |   ifStmt
     ;
 
 assignStmt : left=progExp ':=' right=progExp ';' ;
 swapStmt : left=progExp ':=:' right=progExp ';' ;
 callStmt : progParamExp ';' ;
+noticeStmt : 'Notice' mathAssertionExp ';' ;
 
 whileStmt
     :   'While' progExp
-        changingClause? maintainingClause? decreasingClause?
+        changingClause? maintainingClause decreasingClause
         'do' stmt* 'end' ';'
     ;
 
@@ -301,40 +288,57 @@ elseStmt : 'else' stmt* ;
 
 // program expressions
 
+/*
 progExp
     :   progPrimary                                     #progPrimaryExp
     |   '(' progExp ')'                                 #progNestedExp
-    |   lhs=progExp op='.' rhs=progExp                  #progSelectorExp
-    |   op=('-'|'not') progExp                          #progUnaryExp
-    |   progExp op=('*'|'/'|'%') progExp                #progInfixExp
-    |   progExp op=('+'|'-') progExp                    #progInfixExp
-    |   progExp op=('<='|'>='|'<'|'>') progExp          #progInfixExp
-    |   progExp op=('='|'/=') progExp                   #progInfixExp
-    |   progExp op=('and'|'or') progExp                 #progInfixExp
+    |   lhs=progExp '.' rhs=progExp                     #progSelectorExp
+    |   progExp progOperatorExp progExp                 #progInfixExp
     ;
 
 progPrimary
     :   progLiteralExp
     |   progParamExp
-    |   progNamedExp
+    |   progNameExp
     ;
 
-//operations are first class citizens with respect to a certain class of
-//parameterized resolve implementation-modules. So we
-//represent the name portion as its own (potentially qualified) expression,
-//once again this makes building our function application AST node much easier.
 progParamExp
-    :   progNamedExp '(' (progExp (',' progExp)*)? ')'
+    :   progNameExp '(' (progExp (',' progExp)*)? ')'
+    ;
+*/
+progExp
+    :   lhs=progExp '.' rhs=progExp                     #progSelectorExp
+    |   progExp op=progOperatorExp progExp              #progInfixExp
+    |   '(' progExp ')'                                 #progNestedExp
+    |   progPrimary                                     #progPrimaryExp
     ;
 
-progNamedExp
-    :   (qualifier=ID '.')? name=ID
+progPrimary
+    :   progLiteralExp
+    |   progParamExp
+    |   progNameExp
+    ;
+
+progParamExp
+    :   progNameExp '(' (progExp (',' progExp)*)? ')'
+    ;
+
+progNameExp
+    :   (qualifier=ID '::')? name=ID
+    ;
+
+progOperatorExp
+    :   (qualifier=ID '::')? name=progSymbolName
+    ;
+
+progSymbolName
+    :   (ID | SYM)
     ;
 
 progLiteralExp
-    :   ('true'|'false')    #progBooleanLiteralExp
+    :   BOOL                #progBooleanLiteralExp
     |   INT                 #progIntegerLiteralExp
-    |   CHAR                #progCharacterLiteralExp
+  //  |   CHAR                #progCharacterLiteralExp
     |   STRING              #progStringLiteralExp
     ;
 
@@ -344,21 +348,21 @@ mathTheoremDecl
     :   ('Corollary'|'Theorem') name=ID ':' mathAssertionExp ';'
     ;
 
-mathClssftnTheoremDecl
-    :   'Type' 'Theorem' name=ID ':' mathExp ':' mathExp ';'
+//had better be an assertion involving the use of ':' or
+mathClssftnAssertionDecl
+    :   'Classification' 'Corollary' ':' mathAssertionExp ';'
     ;
 
 mathDefnSig
     :   mathPrefixDefnSigs
     |   mathInfixDefnSig
     |   mathOutfixDefnSig
-    |   mathPostfixDefnSig
+    |   mathMixfixDefnSig
     ;
 
 mathPrefixDefnSig
     :   mathSymbolName (',' mathSymbolName)* ('('
-                mathVarDeclGroup (',' mathVarDeclGroup)* ')')?
-                ':' mathClssftnExp
+        mathVarDeclGroup (',' mathVarDeclGroup)* ')')? ':' mathClssftnExp
     ;
 
 mathPrefixDefnSigs
@@ -371,19 +375,17 @@ mathInfixDefnSig
     ;
 
 mathOutfixDefnSig
-    :   leftSym=('|'|'||'|'<'|'⎝'|'⟨') mathVarDecl
-        rightSym=('⟩'|'⎠'|'|'|'||'|'>') ':' mathClssftnExp
+    :   leftSym=mathBracketOp '(' mathVarDecl ')'
+        rightSym=mathBracketOp ':' mathClssftnExp
     ;
 
-mathPostfixDefnSig
-    :   '('mathVarDecl')' lop='[' mathVarDecl rop=']' ':' mathClssftnExp
+mathMixfixDefnSig
+    :   '(' mathVarDecl ')' lop=mathBracketOp '(' mathVarDecl ')'
+        rop=mathBracketOp ':' mathClssftnExp
     ;
 
-mathSymbolName
-    : ( ID |
-      ('o'|'true'|'false'|INT|'+'|'-'|'*'|'/'|'>'|'≤'|
-       '<'|'<='|'>='|'≥'|'not'|'⌐'|'≼'|'ϒ'|'∪₊'|'≤ᵤ'|'⨩'))
-    ;
+mathSymbolName:     (ID | MATH_UNICODE_SYM | SYM | INT | BOOL) ;
+mathBracketOp :     ('⟨'|'⟩'|'⌈'|'⌉'|'⎝'|'⎠'|'∥'|'['|']'|'|') ;
 
 mathCategoricalDefnDecl
     :   'Categorical' 'Definition' 'for' mathPrefixDefnSigs
@@ -391,7 +393,7 @@ mathCategoricalDefnDecl
     ;
 
 mathStandardDefnDecl
-    :   ('Implicit')? 'Definition' mathDefnSig
+    :   (chainable='Chainable')? ('Implicit')? 'Definition' mathDefnSig
         ('is' body=mathAssertionExp)? ';'
     ;
 
@@ -402,11 +404,11 @@ mathInductiveDefnDecl
     ;
 
 mathVarDeclGroup
-    :   ID (',' ID)* ':' mathClssftnExp
+    :   mathSymbolName (',' mathSymbolName)* ':' mathClssftnExp
     ;
 
 mathVarDecl
-    :   ID ':' mathClssftnExp
+    :   mathSymbolName ':' mathClssftnExp
     ;
 
 // mathematical clauses
@@ -419,8 +421,9 @@ conventionsClause : 'conventions' mathAssertionExp (entailsClause)? ';';
 correspondenceClause : 'correspondence' mathAssertionExp ';';
 changingClause : 'changing' mathExp (',' mathExp)* ';' ;
 maintainingClause : 'maintaining' mathAssertionExp ';' ;
-decreasingClause : 'decreasing' mathExp (',' mathExp)* ';' ;
+decreasingClause : 'decreasing' mathExp ';' ;
 entailsClause : 'which_entails' mathExp ;
+noticeClause : 'Notice' mathExp ';' ;
 
 // mathematical expressions
 
@@ -434,60 +437,27 @@ mathAssertionExp
     ;
 
 mathQuantifiedExp
-    :   q=(FORALL|EXISTS|'∀'|'∃') mathVarDeclGroup ',' mathAssertionExp
+    :   q=(FORALL|EXISTS) mathVarDeclGroup ',' mathAssertionExp
     ;
 
 mathExp
-    :   lhs=mathExp op='.' rhs=mathExp                      #mathSelectorExp
-    |   name=mathExp lop='(' mathExp (',' mathExp)*rop=')'  #mathPrefixAppExp
-    |   mathExp mathSqBrOpExp mathExp (',' mathExp)* ']'    #mathBracketAppExp
-    |   mathExp mathMultOpExp mathExp                       #mathInfixAppExp
-    |   mathExp mathAddOpExp mathExp                        #mathInfixAppExp
-    |   mathExp mathJoiningOpExp mathExp                    #mathInfixAppExp
-    |   mathExp mathSetContainmentOpExp mathExp             #mathInfixAppExp
-    |   mathExp mathEqualityOpExp mathExp                   #mathInfixAppExp
-    |   mathExp mathRelationalOpExp mathExp                 #mathInfixAppExp
-    |   <assoc=right> mathExp mathArrowOpExp mathExp        #mathInfixAppExp
-    |   mathExp ':' mathExp                                 #mathClssftnAssertionExp
-    |   mathExp mathBooleanOpExp mathExp                    #mathInfixAppExp
-    |   mathExp mathImpliesOpExp mathExp                    #mathInfixAppExp
-    |   '(' mathAssertionExp ')'                            #mathNestedExp
-    |   mathPrimeExp                                        #mathPrimaryExp
+    :   lhs=mathExp op='.' rhs=mathExp                                  #mathSelectorExp
+    |   name=mathExp lop='(' mathExp (',' mathExp)* rop=')'             #mathPrefixAppExp
+    |   mathExp mathBracketOp mathExp (',' mathExp)* mathBracketOp      #mathMixfixAppExp
+    |   mathExp op=':' mathExp                                          #mathClssftnAssertionExp
+    |   lhs=mathExp mathSymbolExp rhs=mathExp                           #mathInfixAppExp
+    |   '(' mathAssertionExp ')'                                        #mathNestedExp
+    |   mathPrimeExp                                                    #mathPrimaryExp
     ;
 
-/** Because operators are now first class citizens with expressions all of their
- *  own (as opposed to being simple strings embedded within the context of some application)
- *  we need these intermediate rules to convince antlr to create visitable, *annotatable*,
- *  rule contexts for these guys -- which greatly eases the creation (and subsequent typing) of an AST.
- *  No longer a need to pass special maps around from Token -> MathClassification, etc --
- *  now we just need to visit and annotate these names like any other node).
- */
-//mathMultOpExp : (qualifier=ID '::'|sym='ᶻ')? op=('*'|'/'|'%') ;
-mathSqBrOpExp : op='[' ;
-mathMultOpExp : (qualifier=ID '::')? op=('*'|'/'|'%') ;
-mathAddOpExp : (qualifier=ID '::')? op=('+'|'-'|'~');
-mathJoiningOpExp : (qualifier=ID '::')? op=('o'|'union'|'∪'|'∪₊'|'intersect'|'∩'|'∩₊');
-mathArrowOpExp : (qualifier=ID '::')? op=('->'|'⟶') ;
-mathRelationalOpExp : (qualifier=ID '::')? op=('<'|'>'|'<='|'≤'|'≤ᵤ'|'>='|'≥');
-mathEqualityOpExp : (qualifier=ID '::')? op=('='|'/='|'≠');
-mathSetContainmentOpExp : (qualifier=ID '::')? op=('is_in'|'is_not_in'|'∈'|'∉');
-mathImpliesOpExp : (qualifier=ID '::')? op='implies';
-mathBooleanOpExp : (qualifier=ID '::')? op=('and'|'or'|'∧'|'∨'|'iff');
-
 mathPrimeExp
-    :   mathLiteralExp
-    |   mathCartProdExp
+    :   mathCartProdExp
     |   mathSymbolExp
-    |   mathOutfixAppExp
     |   mathSetRestrictionExp
+    |   mathOutfixAppExp
     |   mathSetExp
     |   mathLambdaExp
     |   mathAlternativeExp
-    ;
-
-mathLiteralExp
-    :   (qualifier=ID '.')? op=('true'|'false')    #mathBooleanLiteralExp
-    |   (qualifier=ID '.')? num=INT                #mathIntegerLiteralExp
     ;
 
 mathCartProdExp
@@ -495,16 +465,11 @@ mathCartProdExp
     ;
 
 mathSymbolExp
-    :   (incoming='@')? (qualifier=ID '.')? name=mathSymbolName
+    :   incoming='#'? (qualifier=ID '::')? name=mathSymbolName
     ;
 
 mathOutfixAppExp
-    :   lop='|' mathExp rop='|'
-    |   lop='||' mathExp rop='||'
-    |   lop='<' mathExp rop='>'
-    |   lop='⟨' mathExp rop='⟩'
-    |   lop='[' mathExp rop=']'
-    |   lop='⎝' mathExp rop='⎠'
+    :   lop=mathBracketOp mathExp rop=mathBracketOp
     ;
 
 mathSetRestrictionExp
@@ -527,32 +492,47 @@ mathAlternativeItemExp
     :   result=mathExp ('if' condition=mathExp ';' | 'otherwise' ';')
     ;
 
-NOT : 'not' ;
-EQUALS : '=' ;
-NEQUALS : '/=' ;
-LT : '<' ;
-LTE : '<=' ;
-GT : '>' ;
-GTE : '>=' ;
-MOD : '%' ;
-TRUE : 'true' ;
-FALSE : 'false' ;
-AND : 'and' ;
-OR : 'or' ;
-PLUS : '+' ;
-MINUS : '-' ;
-MULT : '*' ;
-DIV : '/' ;
+FORALL : ('Forall'|'∀');
+EXISTS : ('Exists'|'∃');
+BOOL : ('true'|'false');
 
-FORALL : ('Forall'|'forall');
-EXISTS : ('Exists'|'exists');
 LINE_COMMENT : '//' .*? ('\n'|EOF)	-> channel(HIDDEN) ;
 COMMENT      : '/*' .*? '*/'    	-> channel(HIDDEN) ;
 
-ID  : [a-zA-Z_] [a-zA-Z0-9_]* ;
-INT : [0-9]+ ;
+ID                  : [a-zA-Z_] [a-zA-Z0-9_]* ;
+INT                 : [0-9]+ ;
+
+//really I'm not sure we need this to be '+' at the end
+SYM             : ('!'|'*'|'+'|'-'|'/'|'='|'/='|'~'|'<'|'>'|'>='|'<=') ;
+
+MATH_UNICODE_SYM
+    :   U_ARROW
+    |   U_LOGIC
+    |   U_LETTER
+    |   U_OPERATOR
+    |   U_RELATION
+    |   [\u0370-\u03FF] //all greek letters
+    ;
+
+U_ARROW        : ('←'|'⇐'|'⟵'|'⟸'|'→'|'⇒'|'⟶'|'⟹'|'↔'|'⇔'|'⟷'|
+                  '⟺'|'↩'|'↪'|'↽'|'⇁'|'↼'|'⇀'|'⇌'|'↝'|'⇃'|'⇂'|'↿'|'↾'|
+                  '↑'|'⇑'|'↓'|'⇓'|'↕'|'⇕'|'↤'|'↦'|'↢'|'↣') ;
+
+U_LOGIC        : ('∧'|'⋀'|'∨'|'⋁'|'¬'|'⋄') ;
+
+/* Notice that U_BRACKET glyphs are special: they don't extend MATH_UNICODE_SYM */
+U_LETTER       : ('𝔹'|'ℂ'|'ℕ'|'ℚ'|'ℝ'|'ℤ'|'℘') ;
+
+U_OPERATOR     : ('∩'|'⋂'|'∪'|'⋃'|'⊔'|'⨆'|'⊓'|'⨅'|'∝'|'⊎'|'⨄'|'±'|'∓'|'×'|'÷'|
+                  '⋅'|'⋆'|'∙'|'∘'|'⊕'|'⨁'|'⊗'|'⨂'|'⊙'|'⨀'|'⊖'|'⟕'|'⟖'|'⟗'|
+                  '∑'|'∏'|'⨿'|'∐'|'⋈'|'⋉'|'⋊'|'⊠'|'⊡'|'∎'|'⨪') ;
+
+U_RELATION     : ('≤'|'≥'|'≪'|'≫'|'≲'|'≳'|'⪅'|'⪆'|'∈'|'∉'|'⊂'|'⊃'|'⊆'|'⊇'|'⊏'|
+                  '⊐'|'⊑'|'⊒'|'∼'|'≐'|'≃'|'≈'|'≍'|'≠'| '≅'|'≡'|'≼'|'≽'|'⊲'|'⊳'|
+                  '⊴'|'⊵'|'△'|'≜') ;
 
 CHAR: '\'' . '\'' ;
-STRING :  '"' (ESC | ~["\\])* '"' ;
-fragment ESC :   '\\' ["\bfnrt] ;
+RAW_STRING : '\'' (ESC | ~["\\])* '\'' ;
+STRING : '"' (ESC | ~["\\])* '"' ;
+fragment ESC : '\\' ["\bfnrt] ;
 WS : [ \t\n\r]+ -> channel(HIDDEN) ;

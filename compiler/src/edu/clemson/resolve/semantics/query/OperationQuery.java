@@ -23,18 +23,15 @@ public class OperationQuery extends BaseSymbolQuery<OperationSymbol> {
                           @NotNull Token name,
                           @NotNull List<ProgType> argumentTypes,
                           @NotNull FacilityStrategy facilityStrategy,
-                          @NotNull ImportStrategy importStrategy) {
-        super(new PossiblyQualifiedPath(qualifier, importStrategy,
-                facilityStrategy, false), new OperationSearcher(name,
-                argumentTypes));
+                          @NotNull ImportStrategy importStrategy,
+                          boolean localPriority) {
+        super(new PossiblyQualifiedPath(qualifier, importStrategy, facilityStrategy, localPriority),
+                new OperationSearcher(name.getText(), argumentTypes, localPriority));
     }
 
-    public OperationQuery(@Nullable Token qualifier,
-                          @NotNull String name,
-                          @NotNull List<ProgType> argumentTypes) {
+    public OperationQuery(@Nullable Token qualifier, @NotNull String name, @NotNull List<ProgType> argumentTypes) {
         super(new PossiblyQualifiedPath(qualifier, ImportStrategy.IMPORT_NAMED,
-                        FacilityStrategy.FACILITY_INSTANTIATE, false),
-                new OperationSearcher(name, argumentTypes));
+                FacilityStrategy.FACILITY_INSTANTIATE, false), new OperationSearcher(name, argumentTypes, true));
     }
 
     public OperationQuery(@Nullable Token qualifier, @NotNull Token name, @NotNull List<ProgType> argumentTypes) {

@@ -2,12 +2,12 @@ package edu.clemson.resolve;
 
 import edu.clemson.resolve.codegen.CodeGenPipeline;
 import edu.clemson.resolve.compiler.*;
-import edu.clemson.resolve.misc.FileLocator;
 import edu.clemson.resolve.misc.LogManager;
 import edu.clemson.resolve.misc.Utils;
 import edu.clemson.resolve.parser.ResolveParser;
 import edu.clemson.resolve.parser.ResolveLexer;
 import edu.clemson.resolve.analysis.AnalysisPipeline;
+import edu.clemson.resolve.proving.ProverListener;
 import edu.clemson.resolve.vcgen.VerifierPipeline;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
@@ -25,9 +25,8 @@ import edu.clemson.resolve.semantics.ModuleIdentifier;
 
 import java.io.*;
 import java.lang.reflect.Field;
-import java.nio.file.Files;
-import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Function;
@@ -75,31 +74,37 @@ public class RESOLVECompiler {
     public final String[] args;
     protected boolean haveOutputDir = false;
 
-    //TODO: Change package of this to pkgLibDirectory or libDirectory.. something like that...
-    public String libDirectory;
     public String outputDirectory;
+    public String genCode;
+    public String timeout;
+    public String tries;
+
+    public String libDirectory;
     public boolean helpFlag = false;
     public boolean vcs = false;
     public boolean longMessages = false;
     public boolean prove = false;
-    public String genCode;
-
     public boolean log = false;
     public boolean printEnv = false;
+    public boolean pathConformalProject = true;
 
     public static Option[] optionDefs = {
             new Option("outputDirectory", "-o", OptionArgType.STRING, "specify output directory where all output is generated"),
             new Option("longMessages", "-long-messages", "show exception details when available for errors and warnings"),
-            new Option("libDirectory", "-lib", OptionArgType.STRING, "specify location of resolve source files"),
             new Option("genCode", "-genCode", OptionArgType.STRING, "generate code"),
-            new Option("genPackage", "-package", OptionArgType.STRING, "specify a package/namespace for the generated code"),
             new Option("vcs", "-vcs", "generate verification conditions (VCs)"),
             new Option("prove", "-prove", "attempt to prove generated VCs for the current file"),
+            new Option("timeout", "-timeout", OptionArgType.STRING, "how much time to spend attempting to dispatch a given vc (in milliseconds)"),
+            new Option("tries", "-numTries", OptionArgType.STRING, "number of tries to dispatch a vc"),
             new Option("log", "-Xlog", "dump lots of logging info to edu.clemson.resolve-timestamp.log"),
             new Option("printEnv", "-env", "print path variables"),
+            new Option("libDirectory", "-lib", OptionArgType.STRING, "specify custom location of resolve source files"),
     };
 
     List<RESOLVECompilerListener> listeners = new CopyOnWriteArrayList<>();
+
+    @Nullable
+    public ProverListener proverListener = null;
 
     /**
      * Track separately so if a listener is added, it's the only one (instead of it plus the default stderr listener).
@@ -109,9 +114,8 @@ public class RESOLVECompiler {
 
     public final List<String> targetFiles = new ArrayList<>();
     public final List<String> targetNames = new ArrayList<>();
-    @NotNull
+
     public final ErrorManager errMgr;
-    @NotNull
     public LogManager logMgr = new LogManager();
 
     /**
@@ -219,7 +223,6 @@ public class RESOLVECompiler {
             resolve.help();
             resolve.exit(0);
         }
-        resolve.version();
         try {
             resolve.processCommandLineTargets();
         } finally {
@@ -258,6 +261,7 @@ public class RESOLVECompiler {
     private List<AnnotatedModule> parseAndReturnRootModules() {
         List<AnnotatedModule> modules = new ArrayList<>();
         for (String e : targetFiles) {
+            //somehow we need to sanitycheck to ensure that the module appears on RESOLVEPATH or RESOLVEROOT...
             AnnotatedModule m = parseModule(e);
             if (m != null) {
                 modules.add(m);
@@ -322,7 +326,7 @@ public class RESOLVECompiler {
     private void findDependencies(@NotNull DefaultDirectedGraph<String, DefaultEdge> g,
                                   @NotNull AnnotatedModule root,
                                   @NotNull Map<String, AnnotatedModule> roots) {
-        for (ModuleIdentifier importRequest : root.uses) {
+        for (ModuleIdentifier importRequest : root.getDependencies().getCombinedUses()) {
             AnnotatedModule module = roots.get(importRequest.getFile().getAbsolutePath());
             if (module == null) {
                 module = parseModule(importRequest.getFile().getAbsolutePath());
@@ -331,7 +335,7 @@ public class RESOLVECompiler {
                 }
             }
             if (module != null) {
-                if (pathExists(g, module.getNameToken().getText(), root.getNameToken().getText())) {
+                if (pathExists(g, module.getModuleIdentifier(), root.getModuleIdentifier())) {
                     errMgr.semanticError(ErrorKind.CIRCULAR_DEPENDENCY,
                             importRequest.getNameToken(), root.getNameToken().getText(),
                             importRequest.getNameToken().getText());
@@ -342,6 +346,25 @@ public class RESOLVECompiler {
                 findDependencies(g, module, roots);
             }
         }
+    }
+
+    @Nullable
+    public static Path getProjectRootPathFor(String fileName) {
+        File file = new File(fileName);
+        try {
+            file.getCanonicalFile().toPath();
+        } catch (IOException e) {
+            return null;
+        }
+        Path resolvePath = Paths.get(getLibrariesPathDirectory() + File.separator + "src");
+        Path resolveCore = Paths.get(getCoreLibraryDirectory() + File.separator + "src");
+        Path filePath = file.toPath();
+        Path lib = filePath.startsWith(resolvePath) ?  resolvePath : resolveCore;
+        String stem = lib.relativize(filePath).toString();
+
+        String projectName = stem.substring(0, stem.indexOf(File.separator));
+        Path result = Paths.get(lib.toString() + File.separator + projectName);
+        return result;
     }
 
     private List<String> getCompileOrder(DefaultDirectedGraph<String, DefaultEdge> g) {
@@ -355,18 +378,18 @@ public class RESOLVECompiler {
     }
 
     private boolean pathExists(@NotNull DefaultDirectedGraph<String, DefaultEdge> g,
-                               @NotNull String src,
-                               @NotNull String dest) {
+                               @NotNull ModuleIdentifier src,
+                               @NotNull ModuleIdentifier dest) {
         //If src doesn't exist in g, then there is obviously no path from
         //src -> ... -> dest
-        if (!g.containsVertex(src)) {
+        if (!g.containsVertex(src.getFile().getAbsolutePath())) {
             return false;
         }
-        GraphIterator<String, DefaultEdge> iterator = new DepthFirstIterator<>(g, src);
+        GraphIterator<String, DefaultEdge> iterator = new DepthFirstIterator<>(g, src.getFile().getAbsolutePath());
         while (iterator.hasNext()) {
             String next = iterator.next();
             //we've reached dest from src -- a path exists.
-            if (next.equals(dest)) {
+            if (next.equals(dest.getFile().getAbsolutePath())) {
                 return true;
             }
         }
@@ -380,8 +403,20 @@ public class RESOLVECompiler {
             if (!file.isAbsolute()) {
                 file = new File(libDirectory, fileName);    //first try searching in the local project..
             }
-            if (!file.exists()) return null;
-            return parseModule(new ANTLRFileStream(file.getCanonicalPath()));
+            if (!file.exists()) {
+                errMgr.toolError(ErrorKind.CANNOT_OPEN_FILE, fileName);
+                return null;
+            }
+            Path canonicalPath = file.getCanonicalFile().toPath();
+            if (!canonicalPath.startsWith(getLibrariesPathDirectory()) &&
+                    !canonicalPath.startsWith(getCoreLibraryDirectory())) {
+                pathConformalProject = false;
+                //Todos: Warning not on RESOLVEPATH or CORE path.
+              //  throw new RuntimeException("You can't create a RESOLVE project that isn't on " +
+              //          "RESOLVEPATH or RESOLVEROOT");
+            }
+            ANTLRFileStream afs = new ANTLRFileStream(file.getCanonicalPath());
+            return parseModule(afs);
         } catch (IOException ioe) {
             errMgr.toolError(ErrorKind.CANNOT_OPEN_FILE, ioe, fileName);
         }
@@ -404,13 +439,12 @@ public class RESOLVECompiler {
         }
         boolean hasParseErrors = parser.getNumberOfSyntaxErrors() > 0;
 
-        //if we have syntactic errors, better not risk processing imports with
-        //our tree (as it usually will result in a flurry of npe's).
-        UsesListener l = new UsesListener(this);
+        //if we have syntactic errors in the tree, better to not risk trying to figure out dependencies
+        DependencyCollectingListener l = new DependencyCollectingListener(input.getSourceName(), this);
         if (!hasParseErrors) {
             ParseTreeWalker.DEFAULT.walk(l, start);
         }
-        return new AnnotatedModule(start, moduleNameTok, parser.getSourceName(), hasParseErrors, l.uses, l.extUses);
+        return new AnnotatedModule(start, moduleNameTok, parser.getSourceName(), hasParseErrors, l.getDependencies());
     }
 
     @NotNull
@@ -426,15 +460,15 @@ public class RESOLVECompiler {
     }
 
     /**
-     * Used primarily by codegen to create new output files. If {@code outputDirectory} (set by -o) isn't present it
-     * will be created. The final filename is sensitive to the output directory and the directory where the soure file
-     * was found in.  If -o is /tmp and the original source file was foo/t.resolve then output files go in /tmp/foo.
+     * Used primarily by codegen to create new output files. If {@code outputDirectory} (set by -o) isn't present it will be created. The
+     * final filename is sensitive to the output directory and the directory where the soure file was found in.  If -o is /tmp and the
+     * original source file was foo/t.resolve then output files go in /tmp/foo.
      * <p>
-     * Default behavior of this file writer is to just output stuff to whatever folder specified by -o in the project
-     * root directory {@code libDirectory}, which is specified by the user.
+     * Default behavior of this file writer is to just output stuff to whatever folder specified by -o in the project root directory
+     * {@code libDirectory}, which is specified by the user.
      * <p>
-     * If no -o is specified, then just write to the directory where the sourcefile was found; and if
-     * {@code outputDirectory==null} then write a String.
+     * If no -o is specified, then just write to the directory where the sourcefile was found; and if {@code outputDirectory==null} then
+     * write a String.
      */
     public Writer getOutputFileWriter(@NotNull ModuleIdentifier module,
                                       @NotNull String outputFileName) throws IOException {
@@ -442,7 +476,7 @@ public class RESOLVECompiler {
             @Override
             public File apply(String filePath) {
                 File outputDir;
-                String fileDirectory = libDirectory;
+                String fileDirectory = ".";
                 if (haveOutputDir) {
                     if (new File(fileDirectory).isAbsolute() || fileDirectory.startsWith("~")) {
                         outputDir = new File(outputDirectory);
@@ -478,8 +512,22 @@ public class RESOLVECompiler {
         return new BufferedWriter(osw);
     }
 
-    public void addListener(@Nullable RESOLVECompilerListener cl) {
-        if (cl != null) listeners.add(cl);
+    public void addProverListener(@Nullable ProverListener pl) {
+        if (pl != null) proverListener = pl;
+    }
+
+    public void addListener(@Nullable RESOLVECompilerListener l) {
+        if (l != null) listeners.add(l);
+    }
+
+    public void addListeners(RESOLVECompilerListener ... listeners) {
+        addListeners(Arrays.asList(listeners));
+    }
+
+    public void addListeners(List<RESOLVECompilerListener> listeners) {
+        for (RESOLVECompilerListener listener : listeners) {
+            addListener(listener);
+        }
     }
 
     public void removeListener(@Nullable RESOLVECompilerListener tl) {

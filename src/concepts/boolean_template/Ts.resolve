@@ -1,7 +1,0 @@
-Facility Ts;
-       // uses
-    Operation Do_Nothing (restores I : Std_Ints::Integer);
-        Procedure
-            Std_Ints::Integer
-    end Do_Nothing;
-end Ts;

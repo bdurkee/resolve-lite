@@ -1,341 +1,106 @@
-/**
- * VerificationConditionCongruenceClosureImpl.java
- * ---------------------------------
- * Copyright (c) 2016
- * RESOLVE Software Research Group
- * School of Computing
- * Clemson University
- * All rights reserved.
- * ---------------------------------
- * This file is subject to the terms and conditions defined in
- * file 'LICENSE.txt', which is part of this source code package.
- */
+
 package edu.clemson.resolve.proving;
 
 import edu.clemson.resolve.proving.absyn.PApply;
 import edu.clemson.resolve.proving.absyn.PExp;
 import edu.clemson.resolve.proving.absyn.PSymbol;
 import edu.clemson.resolve.semantics.DumbMathClssftnHandler;
-import edu.clemson.resolve.semantics.MathClassification;
+import edu.clemson.resolve.semantics.MathClssftn;
 import edu.clemson.resolve.vcgen.VC;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
-/**
- * Created by mike on 4/3/2014.
- */
 public class VerificationConditionCongruenceClosureImpl {
-/*
+
     private final Registry m_registry;
     private final DumbMathClssftnHandler m_typegraph;
     public final String m_name;
     public final String m_VC_string;
-    private final Antecedent m_antecedent;
-    private final Consequent m_consequent;
+    private final PExp m_antecedent;
+    private final PExp m_consequent;
     private final ConjunctionOfNormalizedAtomicExpressions m_conjunction;
-    private final MathClassification m_z;
-    private final MathClassification m_n;
+    private final MathClssftn m_z;
+    private final MathClssftn m_n;
     protected final Set<String> m_goal;
-    private int m_fc_ctr = 0;
-    private final boolean DOCOMPLEMENTS = false;
 
     public static enum STATUS {
-        FALSE_ASSUMPTION, STILL_EVALUATING, PROVED, UNPROVABLE
+        FALSE_ASSUMPTION, STILL_EVALUATING, PROVED, UNPROVABLE, CANCELLED
     }
 
     public List<PExp> forAllQuantifiedPExps; // trap constraints, can create Theorems externally from this
 
     // currently support only unchained equalities, so each sublist is size 2.
-    public VerificationConditionCongruenceClosureImpl(DumbMathClssftnHandler g, VC vc,
-                                                      MathClassification z, MathClassification n) {
+    public VerificationConditionCongruenceClosureImpl(@NotNull DumbMathClssftnHandler g,
+                                                      @NotNull VC vc,
+                                                      MathClssftn z, MathClssftn n) {
         m_typegraph = g;
-        m_name = vc.getName();
+        m_name = Integer.toString(vc.getNumber());
         m_VC_string = vc.toString();
-        m_antecedent = vc.getAntecedent();
-        m_consequent = vc.getConsequent();
+        m_antecedent = g.formConjuncts(vc.getSequent().getLeftFormulas());
+        m_consequent = g.formConjuncts(vc.getSequent().getRightFormulas());
         m_registry = new Registry(g);
         m_z = z;
         m_n = n;
-        m_conjunction = new ConjunctionOfNormalizedAtomicExpressions(m_registry, this);
+        m_conjunction =
+                new ConjunctionOfNormalizedAtomicExpressions(m_registry, this);
         m_goal = new HashSet<String>();
 
-        addPExp(m_consequent.iterator(), false);
-        addPExp(m_antecedent.iterator(), true);
+        addPExp(m_consequent.splitIntoConjuncts().iterator(), false);
 
-        forAllQuantifiedPExps = new ArrayList<PExp>();
-        if (vc.m_liftedLambdaPredicates != null
-                && vc.m_liftedLambdaPredicates.size() > 0) {
-            forAllQuantifiedPExps.addAll(vc.m_liftedLambdaPredicates);
-            //addPExp(forAllQuantifiedPExps.iterator(),true);
-            makeSetAssertions(vc);
-        }
+        List<PExp> ants = new ArrayList<>(m_antecedent.splitIntoConjuncts());
+        //just a test
+        /*if (this.m_name.equals("3")) {
+            ants.remove(4);
+        }*/
+        addPExp(ants.iterator(), true);
+
         // seed with (true = false) = false
-        ArrayList<PExp> args = new ArrayList<PExp>();
-        PSymbol fls = m_typegraph.getFalseExp();
-        PSymbol tr = m_typegraph.getTrueExp();
-        args.add(tr);
-        args.add(fls);
-
-        PExp boolEqualitySym = new PSymbol.PSymbolBuilder("=B").mathClssfctn(m_typegraph.EQUALITY_FUNCTION).build();
-        PApply trEqF = new PApply.PApplyBuilder(boolEqualitySym).arguments(args).build();
-        args.clear();
-        args.add(trEqF);
-        args.add(fls);
-        PSymbol trEqFEqF = new PSymbol(m_typegraph.BOOLEAN, null, "=B", args);
-        args.clear();
+        PSymbol boolEqFuncName = new PSymbol.PSymbolBuilder("=B").mathClssfctn(g.EQUALITY_FUNCTION).build();
+        PApply trEqF = new PApply.PApplyBuilder(boolEqFuncName)
+                .arguments(g.getTrueExp(), g.getFalseExp())
+                .applicationType(g.BOOLEAN)
+                .build();
+        PApply trEqFEqF = new PApply.PApplyBuilder(boolEqFuncName)
+                .arguments(trEqF, g.getFalseExp())
+                .applicationType(g.BOOLEAN)
+                .build();
         m_conjunction.addExpression(trEqFEqF);
 
-        // seed with true and true.  Need this for search: x and y, when x and y are both true
-        args.add(tr);
-        args.add(tr);
-        PSymbol tandt = new PSymbol(m_typegraph.BOOLEAN, null, "andB", args);
-        args.clear();
-        args.add(tandt);
-        args.add(tr);
-        PSymbol tandteqt = new PSymbol(m_typegraph.BOOLEAN, null, "=B", args);
+        PSymbol boolAndName = new PSymbol.PSymbolBuilder("andB").mathClssfctn(g.BOOLEAN_FUNCTION).build();
+
+        // seed with (true and true) = true.  Need this for search: x and y, when x and y are both true
+        PApply tandt = new PApply.PApplyBuilder(boolAndName)
+                .arguments(g.getTrueExp(), g.getTrueExp())
+                .applicationType(g.BOOLEAN)
+                .build();
+        PApply tandteqt = new PApply.PApplyBuilder(boolEqFuncName)
+                .arguments(tandt, g.getTrueExp())
+                .applicationType(g.BOOLEAN)
+                .build();
         m_conjunction.addExpression(tandteqt);
-        args.clear();
-        // seed with true and false = false
-        args.add(tr);
-        args.add(fls);
-        PSymbol tandf = new PSymbol(m_typegraph.BOOLEAN, null, "andB", args);
-        args.clear();
-        args.add(tandf);
-        args.add(fls);
-        PSymbol tandfeqf = new PSymbol(m_typegraph.BOOLEAN, null, "=B", args);
+
+        // seed with (true and false) = false
+        PApply tandf = new PApply.PApplyBuilder(boolAndName)
+                .arguments(g.getTrueExp(), g.getFalseExp())
+                .applicationType(g.BOOLEAN)
+                .build();
+        PApply tandfeqf = new PApply.PApplyBuilder(boolEqFuncName)
+                .arguments(tandf, g.getFalseExp())
+                .applicationType(g.BOOLEAN)
+                .build();
         m_conjunction.addExpression(tandfeqf);
-        // seed with false and false = false
-        args.clear();
-        args.add(fls);
-        args.add(fls);
-        PSymbol fandf = new PSymbol(m_typegraph.BOOLEAN, null, "andB", args);
-        args.clear();
-        args.add(fandf);
-        args.add(fls);
-        PSymbol fandfeqf = new PSymbol(m_typegraph.BOOLEAN, null, "=B", args);
+
+        // seed with (false and false) = false
+        PApply fandf = new PApply.PApplyBuilder(boolAndName)
+                .arguments(g.getFalseExp(), g.getFalseExp())
+                .applicationType(g.BOOLEAN)
+                .build();
+        PApply fandfeqf = new PApply.PApplyBuilder(boolEqFuncName)
+                .arguments(fandf, g.getFalseExp())
+                .applicationType(g.BOOLEAN)
+                .build();
         m_conjunction.addExpression(fandfeqf);
-    }
-
-    //Ex.: p is for all k:Z, lambda0(k) = (x <= k)
-    //Adds these assertions:
-    //lambda0(_sv0) = (x <= _sv0)
-    //ZSetConB(lambda0) = ZSetCons(_sv0)
-    //------ Complements
-    //lambda0(_sv0_Comp) = not(x <=_sv0_Comp)
-    //ZSetComplement(ZSetCons(_sv0)) = ZSetCons(_sv0_Comp)
-    //
-    protected void assertSet(PExp p, ModuleScope scope) {
-        if (p.getQuantifiedVariables().size() != 1)
-            return;
-        List<edu.clemson.cs.r2jt.typeandpopulate.entry.SymbolTableEntry> entries =
-                scope.query(new NameQuery(null, "ZSetCons",
-                        MathSymbolTable.ImportStrategy.IMPORT_RECURSIVE,
-                        MathSymbolTable.FacilityStrategy.FACILITY_INSTANTIATE,
-                        false));
-        if (entries.isEmpty())
-            return;
-        MathSymbolEntry e = (MathSymbolEntry) entries.get(0);
-        MTType consT = e.getType();
-        entries =
-                scope.query(new NameQuery(null, "ZSetConB",
-                        MathSymbolTable.ImportStrategy.IMPORT_RECURSIVE,
-                        MathSymbolTable.FacilityStrategy.FACILITY_INSTANTIATE,
-                        false));
-        if (entries.isEmpty())
-            return;
-        e = (MathSymbolEntry) entries.get(0);
-        MTFunction conB = (MTFunction) e.getType();
-        PSymbol arg = p.getQuantifiedVariables().iterator().next();
-        PSymbol fc =
-                new PSymbol(arg.getType(), arg.getTypeValue(), "_sv"
-                        + ++m_fc_ctr);
-        HashMap<PExp, PExp> subMap = new HashMap<PExp, PExp>();
-        subMap.put(arg, fc);
-        PExp toAdd = p.substitute(subMap);
-        m_conjunction.addExpression(toAdd);
-        ArrayList<PExp> args = new ArrayList<PExp>();
-        // change to ensure always adding f of f(x)
-        PExp fx = toAdd.getSubExpressions().get(0);
-        PSymbol lamName =
-                new PSymbol(new MTFunction(m_typegraph, fx.getType(), fc
-                        .getType()), null, fx.getTopLevelOperation());
-        args.add(lamName);
-        PSymbol s1 = new PSymbol(conB, null, "ZSetConB", args);
-        args.clear();
-        args.add(fc);
-        PSymbol s2 = new PSymbol(consT, null, "ZSetCons", args);
-        args.clear();
-        args.add(s1);
-        args.add(s2);
-        PSymbol setAsrt = new PSymbol(m_typegraph.BOOLEAN, null, "=", args);
-        m_conjunction.addExpression(setAsrt);
-
-        // What follows enters set complement assertions
-        if (DOCOMPLEMENTS) {
-            entries =
-                    scope
-                            .query(new NameQuery(
-                                    null,
-                                    "ZSetComplement",
-                                    MathSymbolTable.ImportStrategy.IMPORT_RECURSIVE,
-                                    MathSymbolTable.FacilityStrategy.FACILITY_INSTANTIATE,
-                                    false));
-            if (entries.isEmpty())
-                return;
-            MTType compT = ((MathSymbolEntry) entries.get(0)).getType();
-            args.clear();
-            args.add(p.getSubExpressions().get(1));
-            PSymbol notRhs =
-                    new PSymbol(m_typegraph.BOOLEAN, null, "not", args);
-            args.clear();
-            args.add(p.getSubExpressions().get(0));
-            args.add(notRhs);
-            PExp notP = new PSymbol(m_typegraph.BOOLEAN, null, "=", args);
-            PSymbol fc_comp =
-                    new PSymbol(arg.getType(), arg.getTypeValue(), "_sv"
-                            + m_fc_ctr + "_Comp");
-            subMap.clear();
-            subMap.put(arg, fc_comp);
-            notP = notP.substitute(subMap);
-            m_conjunction.addExpression(notP);
-            args.clear();
-            args.add(s2);
-            PSymbol compL = new PSymbol(compT, null, "ZSetComplement", args);
-            args.clear();
-            args.add(fc_comp);
-            PSymbol compR = new PSymbol(consT, null, "ZSetCons", args);
-            args.clear();
-            args.add(compL);
-            args.add(compR);
-            PSymbol compEq = new PSymbol(m_typegraph.BOOLEAN, null, "=", args);
-            m_conjunction.addExpression(compEq);
-        }
-    }
-
-    private void makeSetAssertions(VC vc) {
-        ArrayList<PExp> splitConditions = new ArrayList<PExp>();
-        boolean allOverZ = true;
-        int c_count = 0;
-        for (PExp px : vc.m_conditions) {
-            // name it. add it to quantified expr list
-            if (px.getQuantifiedVariables().size() != 1)
-                continue;
-            PSymbol qFun =
-                    new PSymbol(new MTFunction(m_typegraph,
-                            m_typegraph.BOOLEAN, px.getQuantifiedVariables()
-                                    .iterator().next().getType()), null,
-                            "ConFunc" + (++c_count), new ArrayList<PExp>(px
-                                    .getQuantifiedVariables()));
-            ArrayList<PExp> args = new ArrayList<PExp>();
-            args.add(qFun);
-            args.add(px);
-            PSymbol qFunAssrt =
-                    new PSymbol(m_typegraph.BOOLEAN, null, "=", args);
-            args.clear();
-            forAllQuantifiedPExps.add(qFunAssrt);
-
-            HashMap<PExp, PExp> substMap = new HashMap<PExp, PExp>();
-
-            // true branch
-            PSymbol tBSym = null;
-            for (PSymbol pq : px.getQuantifiedVariables()) {
-                if (!pq.getType().toString().equals("Z"))
-                    allOverZ = false;
-                tBSym =
-                        new PSymbol(pq.getType(), pq.getTypeValue(), pq
-                                .getTopLevelOperation()
-                                + ".T", PSymbol.Quantification.NONE);
-                substMap.put(pq, tBSym);
-            }
-            PExp pxTrue = px.substitute(substMap);
-            //splitConditions.add(pxTrue);
-            args.add(pxTrue);
-            args.add(new PSymbol(m_typegraph.BOOLEAN, null, "conVal"
-                    + (++c_count)));
-            splitConditions.add(new PSymbol(m_typegraph.BOOLEAN, null, "=",
-                    args));
-            // false branch
-            PSymbol fBSym = null;
-            for (PSymbol pq : px.getQuantifiedVariables()) {
-                fBSym =
-                        new PSymbol(pq.getType(), pq.getTypeValue(), pq
-                                .getTopLevelOperation()
-                                + ".F", PSymbol.Quantification.NONE);
-                substMap.put(pq, fBSym);
-            }
-            PExp pxFalse = px.substitute(substMap);
-            args.clear();
-            args.add(pxFalse);
-            PSymbol negatedCondition =
-                    new PSymbol(m_typegraph.BOOLEAN, null, "not", args);
-            //splitConditions.add(negatedCondition);
-            args.clear();
-            args.add(negatedCondition);
-            args.add(new PSymbol(m_typegraph.BOOLEAN, null, "conVal"
-                    + (++c_count)));
-            splitConditions.add(new PSymbol(m_typegraph.BOOLEAN, null, "=",
-                    args));
-
-            args.clear();
-            args.add(tBSym);
-            args.add(fBSym);
-            PSymbol assertion =
-                    new PSymbol(m_typegraph.BOOLEAN, null, "unionMakesZ", args);
-            if (allOverZ)
-                splitConditions.add(assertion);
-        }
-        addPExp(splitConditions.iterator(), true);
-
-    }
-
-    private void makeSetAssertionsOld(VC vc) {
-        ArrayList<PExp> splitConditions = new ArrayList<PExp>();
-        boolean allOverZ = true;
-        for (PExp px : vc.m_conditions) {
-            HashMap<PExp, PExp> substMap = new HashMap<PExp, PExp>();
-            ArrayList<PExp> args = new ArrayList<PExp>();
-            // true branch
-            PSymbol tBSym = null;
-            for (PSymbol pq : px.getQuantifiedVariables()) {
-                if (!pq.getType().toString().equals("Z"))
-                    allOverZ = false;
-                tBSym =
-                        new PSymbol(pq.getType(), pq.getTypeValue(), pq
-                                .getTopLevelOperation()
-                                + ".T", PSymbol.Quantification.NONE);
-                substMap.put(pq, tBSym);
-            }
-            PExp pxTrue = px.substitute(substMap);
-            splitConditions.add(pxTrue);
-            //args.add(pxTrue);
-            //args.add(new PSymbol(g.BOOLEAN, null, "true"));
-            //splitConditions.add(new PSymbol(g.BOOLEAN, null, "=", args));
-            // false branch
-            PSymbol fBSym = null;
-            for (PSymbol pq : px.getQuantifiedVariables()) {
-                fBSym =
-                        new PSymbol(pq.getType(), pq.getTypeValue(), pq
-                                .getTopLevelOperation()
-                                + ".F", PSymbol.Quantification.NONE);
-                substMap.put(pq, fBSym);
-            }
-            PExp pxFalse = px.substitute(substMap);
-            args.clear();
-            args.add(pxFalse);
-            PSymbol negatedCondition =
-                    new PSymbol(m_typegraph.BOOLEAN, null, "not", args);
-            splitConditions.add(negatedCondition);
-
-            args.clear();
-            args.add(tBSym);
-            args.add(fBSym);
-            PSymbol assertion =
-                    new PSymbol(m_typegraph.BOOLEAN, null, "unionMakesZ", args);
-            if (allOverZ)
-                splitConditions.add(assertion);
-        }
-        addPExp(splitConditions.iterator(), true);
-
     }
 
     protected ConjunctionOfNormalizedAtomicExpressions getConjunct() {
@@ -360,31 +125,34 @@ public class VerificationConditionCongruenceClosureImpl {
 
     private void addPExp(Iterator<PExp> pit, boolean inAntecedent) {
         while (pit.hasNext() && !m_conjunction.m_evaluates_to_false) {
-            PExp curr =
-                    Utilities.replacePExp(pit.next(), m_typegraph, m_z, m_n);
+            PExp curr = Utilities.replacePExp(pit.next(), m_typegraph, m_z, m_n);
             if (inAntecedent) {
                 m_conjunction.addExpression(curr);
             }
             else {
-                int intRepForExp = m_conjunction.addFormula(curr);
-                addGoal(m_registry.getSymbolForIndex(intRepForExp));
+                // Temp: replace with eliminate()
+                if ((curr.getTopLevelOperationName().equals("orB") || curr.getTopLevelOperationName().equals("∨B"))
+                        && curr instanceof PApply) {
+                    addGoal(m_registry.getSymbolForIndex(m_conjunction.addFormula(curr.getSubExpressions().get(1))));
+                    addGoal(m_registry.getSymbolForIndex(m_conjunction.addFormula(curr.getSubExpressions().get(2))));
+                }
+                else {
+                    int intRepForExp = m_conjunction.addFormula(curr);
+                    addGoal(m_registry.getSymbolForIndex(intRepForExp));
+                }
             }
         }
     }
 
     protected void addGoal(String a) {
         String r = m_registry.getRootSymbolForSymbol(a);
-        if (m_goal.contains(r))
-            return;
+        if (m_goal.contains(r)) return;
         m_goal.add(r);
     }
 
     @Override
     public String toString() {
         String r = "\n" + "\n" + m_name + "\n" + m_conjunction;
-        for (PExp pq : forAllQuantifiedPExps) {
-            r += pq.toString() + "\n";
-        }
         r += "----------------------------------\n";
 
         // Goals
@@ -396,5 +164,4 @@ public class VerificationConditionCongruenceClosureImpl {
         r += "\n";
         return r;
     }
-*/
 }

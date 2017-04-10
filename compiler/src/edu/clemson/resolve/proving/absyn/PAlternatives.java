@@ -2,8 +2,11 @@ package edu.clemson.resolve.proving.absyn;
 
 import org.antlr.v4.runtime.Token;
 import org.jetbrains.annotations.NotNull;
-import edu.clemson.resolve.semantics.MathClassification;
+import edu.clemson.resolve.semantics.MathClssftn;
 import org.jetbrains.annotations.Nullable;
+import org.stringtemplate.v4.ST;
+import org.stringtemplate.v4.STGroup;
+import org.stringtemplate.v4.STGroupString;
 
 import java.util.*;
 import java.util.function.Function;
@@ -15,14 +18,14 @@ public class PAlternatives extends PExp {
     private final PExp otherwiseClauseResult;
 
     public PAlternatives(List<PExp> conditions, List<PExp> results,
-                         PExp otherwiseClauseResult, MathClassification type) {
+                         PExp otherwiseClauseResult, MathClssftn type) {
         this(conditions, results, otherwiseClauseResult, type, null, null);
     }
 
     public PAlternatives(@NotNull List<PExp> conditions,
                          @NotNull List<PExp> results,
                          @Nullable PExp otherwiseClauseResult,
-                         @NotNull MathClassification type,
+                         @NotNull MathClssftn type,
                          @Nullable Token vcLocation,
                          @Nullable String vcExplanation) {
         super(calculateStructureHash(conditions, results,
@@ -43,21 +46,29 @@ public class PAlternatives extends PExp {
         this.otherwiseClauseResult = otherwiseClauseResult;
     }
 
+    @NotNull
+    public PExp getOtherwiseClauseResult() {
+        return otherwiseClauseResult;
+    }
+
+    public List<Alternative> getAlternatives() {
+        return alternatives;
+    }
+
+    @Override
+    public PExp withPrimeMarkAdded() {
+        return this;
+    }
+
     public void accept(PExpListener v) {
         v.beginPExp(this);
         v.beginPAlternatives(this);
         v.beginChildren(this);
 
-        boolean first = true;
         for (Alternative alt : alternatives) {
-            if (!first) {
-                v.fencepostPAlternatives(this);
-            }
-            first = false;
             alt.result.accept(v);
             alt.condition.accept(v);
         }
-        v.fencepostPAlternatives(this);
         otherwiseClauseResult.accept(v);
         v.endChildren(this);
         v.endPAlternatives(this);
@@ -200,6 +211,7 @@ public class PAlternatives extends PExp {
         sb.append("{{");
         for (Alternative alternative : alternatives) {
             sb.append(alternative.toString());
+            sb.append(" ");
         }
         sb.append(otherwiseClauseResult).append(" otherwise;");
         sb.append("}}");
@@ -278,6 +290,19 @@ public class PAlternatives extends PExp {
         }
     }
 
+    @NotNull
+    @Override
+    public Set<PSymbol> getFreeVariablesNoCache() {
+        Set<PSymbol> result = new LinkedHashSet<>(); //i'd like to preserve first found order
+
+        for (Alternative a : alternatives) {
+            result.addAll(a.condition.getFreeVariables());
+            result.addAll(a.result.getFreeVariables());
+        }
+        result.addAll(otherwiseClauseResult.getFreeVariables());
+        return result;
+    }
+
     private static class UnboxCondition implements Function<Alternative, PExp> {
         public final static UnboxCondition INSTANCE = new UnboxCondition();
 
@@ -287,7 +312,7 @@ public class PAlternatives extends PExp {
         }
     }
 
-    private static class Alternative {
+    protected static class Alternative {
         public final PExp condition, result;
 
         public Alternative(PExp condition, PExp result) {
@@ -296,7 +321,7 @@ public class PAlternatives extends PExp {
         }
 
         public String toString() {
-            return result + " if " + condition + ";";
+            return result + " if " + condition.toString(false) + ";";
         }
     }
 }

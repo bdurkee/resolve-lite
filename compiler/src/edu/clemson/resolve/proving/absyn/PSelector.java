@@ -18,14 +18,16 @@ public class PSelector extends PExp {
         this.right = right;
     }
 
-    public PSelector(@NotNull PExp left,
-                     @NotNull PExp right,
-                     @Nullable Token vcLocation,
-                     @Nullable String vcExplanation) {
-        super(left.structureHash * 72, right.structureHash * 36, right.getMathClssftn(),
-                right.getProgType(), vcLocation, vcExplanation);
+    public PSelector(@NotNull PExp left, @NotNull PExp right, @Nullable Token vcLocation, @Nullable String vcExplanation) {
+        super(left.structureHash * 72, right.structureHash * 36, right.getMathClssftn(), right.getProgType(), vcLocation, vcExplanation);
         this.left = left;
         this.right = right;
+    }
+
+    @Override
+    @NotNull
+    public PExp withPrimeMarkAdded() {
+        return new PSelector(left, right.withPrimeMarkAdded(), getVCLocation(), getVCExplanation());
     }
 
     @Override
@@ -50,9 +52,20 @@ public class PSelector extends PExp {
             result = substitutions.get(this);
         }
         else {
-            result = new PSelector(left.substitute(substitutions), right.substitute(substitutions));
+            result = new PSelector(left.substitute(substitutions), right.substitute(substitutions),
+                    getVCLocation(), getVCExplanation());
         }
         return result;
+    }
+
+    @NotNull
+    public PExp getLeft() {
+        return left;
+    }
+
+    @NotNull
+    public PExp getRight() {
+        return right;
     }
 
     @Override
@@ -98,14 +111,15 @@ public class PSelector extends PExp {
     @NotNull
     @Override
     public PExp withIncomingSignsErased() {
-        return new PSelector(left.withIncomingSignsErased(), right.withIncomingSignsErased());
+        return new PSelector(left.withIncomingSignsErased(), right.withIncomingSignsErased(),
+                getVCLocation(), getVCExplanation());
     }
 
     //shouldn't be any quantifiers in a dot expr
     @NotNull
     @Override
     public PExp withQuantifiersFlipped() {
-        return this;
+        return new PSelector(left, right, getVCLocation(), getVCExplanation());
     }
 
     //TODO: Someday, if this class is still around, use Utils.apply (collection ver. here)
@@ -154,6 +168,14 @@ public class PSelector extends PExp {
         result.addAll(right.getSymbolNames(
                 excludeApplications, excludeLiterals));
         return result;*/
+    }
+
+    @NotNull
+    @Override
+    public Set<PSymbol> getFreeVariablesNoCache() {
+        Set<PSymbol> result = new LinkedHashSet<>(left.getQuantifiedVariables());
+        result.addAll(right.getFreeVariables());
+        return result;
     }
 
     @Override

@@ -2,7 +2,7 @@ package edu.clemson.resolve.semantics.programtype;
 
 import edu.clemson.resolve.proving.absyn.PExp;
 import org.jetbrains.annotations.NotNull;
-import edu.clemson.resolve.semantics.MathClassification;
+import edu.clemson.resolve.semantics.MathClssftn;
 import edu.clemson.resolve.semantics.ModuleIdentifier;
 import edu.clemson.resolve.semantics.symbol.FacilitySymbol;
 import edu.clemson.resolve.semantics.symbol.Symbol;
@@ -12,13 +12,13 @@ import java.util.Map;
 public class ProgFamilyType extends ProgNamedType {
 
     @NotNull
-    private final MathClassification model;
+    private final MathClssftn model;
     @NotNull
     private final String name, exemplarName;
     @NotNull
     private final PExp constraint;
 
-    public ProgFamilyType(@NotNull MathClassification model,
+    public ProgFamilyType(@NotNull MathClssftn model,
                           @NotNull String name,
                           @NotNull String exemplarName,
                           @NotNull PExp constraint,
@@ -48,7 +48,7 @@ public class ProgFamilyType extends ProgNamedType {
 
     @NotNull
     @Override
-    public MathClassification toMath() {
+    public MathClssftn toMath() {
         return model;
     }
 
@@ -62,13 +62,13 @@ public class ProgFamilyType extends ProgNamedType {
     public ProgType instantiateGenerics(@NotNull Map<String, ProgType> genericInstantiations,
                                         @NotNull FacilitySymbol instantiatingFacility) {
 
-        Map<String, MathClassification> mathTypeToMathType = Symbol.buildMathTypeGenerics(genericInstantiations);
+        Map<String, MathClssftn> mathTypeToMathType = Symbol.buildMathTypeGenerics(genericInstantiations);
 
       /*  @SuppressWarnings("unchecked") Map<MathClassification, MathClassification> mathTypeToMathType =
                 (Map<MathClassification, MathClassification>) (Map<?, MathClassification>) MathNamedClassification.toMTNamedMap(
                         getTypeGraph(), stringToMathType);
 
-        //Todo: Not currently substituting generics into math expressions..
+        //Todo: Not currently substituting generics into mathFor expressions..
         MathClassification newModel =
                 myModel.getCopyWithVariablesSubstituted(stringToMathType);
 

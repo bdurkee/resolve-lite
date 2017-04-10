@@ -1,4 +1,4 @@
 Precis Monogenerator_Theory;
     Definition Is_Monogeneric_for
-            (D : SSet, b : D, g : D ⟶ D) : B;
+            (D : SSet, b : D, g : D ⟶ D) : 𝔹;
 end Monogenerator_Theory;

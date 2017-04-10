@@ -76,8 +76,7 @@ public class UnqualifiedPath implements ScopeSearchPath {
                 source.addMatches(searcher, results, searchedScopes, genericInstantiations, instantiatingFacility,
                         SearchContext.SOURCE_MODULE);
 
-        if (searcher instanceof SymbolTypeSearcher &&
-                !finished && facilityStrategy != FacilityStrategy.FACILITY_IGNORE) {
+        if (!finished && facilityStrategy != FacilityStrategy.FACILITY_IGNORE) {
             finished = searchFacilities(searcher, results, source, genericInstantiations, searchedScopes, repo);
         }
 
@@ -119,22 +118,18 @@ public class UnqualifiedPath implements ScopeSearchPath {
             facility = facilitiesIter.next();
             facilityConcept = facility.getFacility().getSpecification();
 
-            facilityScope = facilityConcept.getScope(facilityStrategy.equals(FacilityStrategy.FACILITY_INSTANTIATE));
+            facilityScope = facilityConcept.getScope(
+                    facilityStrategy.equals(FacilityStrategy.FACILITY_INSTANTIATE));
 
-            finished = facilityScope.addMatches(
-                    searcher, result, searchedScopes, new HashMap<String, ProgType>(), null, SearchContext.FACILITY);
-
-            // YS Edits
-            // Search any enhancements in this facility declaration
-            /*  if (!finished) {
+            finished = facilityScope.addMatches(searcher, result, searchedScopes,
+                    new HashMap<String, ProgType>(), null, SearchContext.FACILITY);
+            if (!finished) {
                   List<ModuleParameterization> enhancementList =
                           facility.getEnhancements();
                   for (ModuleParameterization facEnh : enhancementList) {
                       // Obtain the scope for the enhancement
-                      facilityScope =
-                              facEnh
-                                      .getScope(myFacilityStrategy
-                                              .equals(FacilityStrategy.FACILITY_INSTANTIATE));
+                      facilityScope = facEnh.getScope(
+                              facilityStrategy.equals(FacilityStrategy.FACILITY_INSTANTIATE));
                       // Search and add matches.
                       finished =
                               facilityScope.addMatches(searcher, result,
@@ -142,7 +137,7 @@ public class UnqualifiedPath implements ScopeSearchPath {
                                       new HashMap<String, ProgType>(), null,
                                       SearchContext.FACILITY);
                   }
-              }*/
+              }
         }
         return finished;
     }

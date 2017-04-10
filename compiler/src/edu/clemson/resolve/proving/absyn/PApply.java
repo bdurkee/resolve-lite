@@ -1,8 +1,7 @@
 package edu.clemson.resolve.proving.absyn;
 
 import edu.clemson.resolve.misc.Utils;
-import edu.clemson.resolve.semantics.DumbMathClssftnHandler;
-import edu.clemson.resolve.semantics.MathClassification;
+import edu.clemson.resolve.semantics.MathClssftn;
 import edu.clemson.resolve.semantics.Quantification;
 import org.antlr.v4.runtime.Token;
 import org.jetbrains.annotations.NotNull;
@@ -21,14 +20,13 @@ public class PApply extends PExp {
 
     /**
      * An enumerated type that provides additional information about how to display an instance of {@link PApply},
-     * specifically whether it should be displayed as an infix, outfix, prefix, or postfix style application.
+     * specifically whether it should be displayed as an infix, outfix, prefix, or postfix style app.
      * <p>
      * Note that while this enum indeed stands-in for the four subclasses we'd otherwise need to represent the
-     * application styles mentioned, we still can get specific visitor methods for each style (even with an enum)
+     * app styles mentioned, we still can get specific visitor methods for each style (even with an enum)
      * courtesy of the following accept methods:</p>
      * <ul>
      * <li>{@link #beginAccept(PExpListener, PApply)}</li>
-     * <li>{@link #fencepostAccept(PExpListener, PApply)}</li>
      * <li>{@link #endAccept(PExpListener, PApply)}</li>
      * </ul>
      */
@@ -37,23 +35,13 @@ public class PApply extends PExp {
         /** Traditional prefix style applications of the form: {@code F(x)} */
         PREFIX {
             @Override
-            protected String toString(PApply s) {
-                if (s.isBracketBasedApp) {
-                    return s.arguments.get(0) + "[" + s.arguments.get(1) + "]";
-                }
-                else {
-                    return s.functionPortion.toString() + "(" + Utils.join(s.arguments, ", ") + ")";
-                }
+            protected String toString(PApply s, boolean parenthesizeApps) {
+                return s.functionPortion.toString() + "(" + pexpJoin(s.arguments, parenthesizeApps) + ")";
             }
 
             @Override
             protected void beginAccept(PExpListener v, PApply s) {
                 v.beginPrefixPApply(s);
-            }
-
-            @Override
-            protected void fencepostAccept(PExpListener v, PApply s) {
-                v.fencepostPrefixPApply(s);
             }
 
             @Override
@@ -64,8 +52,12 @@ public class PApply extends PExp {
         /** Binary infix style applications where the arguments are on either side of the function: {@code x F y} */
         INFIX {
             @Override
-            protected String toString(PApply s) {
-                return "(" + Utils.join(s.arguments, " " + s.functionPortion.getTopLevelOperationName() + " ") + ")";
+            protected String toString(PApply s, boolean parenthesizeApps) {
+                PExp left = s.arguments.get(0);
+                PExp right = s.arguments.get(1);
+                String result = left.toString(parenthesizeApps) + " " + s.functionPortion.getTopLevelOperationName() + " "
+                        + right.toString(parenthesizeApps);
+                return parenthesizeApps ?  "(" + result + ")" : result;
             }
 
             @Override
@@ -74,40 +66,29 @@ public class PApply extends PExp {
             }
 
             @Override
-            protected void fencepostAccept(PExpListener v, PApply s) {
-                v.fencepostInfixPApply(s);
-            }
-
-            @Override
             protected void endAccept(PExpListener v, PApply s) {
                 v.endInfixPApply(s);
             }
         },
-        /** Postfix style applications where the operator proceeds its argumemts: {@code x y F} */
-        POSTFIX {
+        /** Mixfix style applications where the operator proceeds its argumemts: {@code F *lname* x, y *rname*} */
+        MIXFIX {
             @Override
-            protected String toString(PApply s) {
-                String retval = Utils.join(s.arguments, ", ");
-
-                if (s.arguments.size() > 1) {
-                    retval = "(" + retval + ")";
-                }
-                return retval + s.functionPortion.getTopLevelOperationName();
+            protected String toString(PApply s, boolean parenthesizeApps) {
+                PSymbol functionPortion = (PSymbol) s.getFunctionPortion();
+                //seems risky, but the parser guarantees there will be at least 2 arguments.
+                return s.getArguments().get(0) + functionPortion.getLeftPrint()
+                        + pexpJoin(s.getArguments().subList(1, s.getArguments().size()), parenthesizeApps)
+                        + functionPortion.getRightPrint();
             }
 
             @Override
             protected void beginAccept(PExpListener v, PApply s) {
-                v.beginPostfixPApply(s);
-            }
-
-            @Override
-            protected void fencepostAccept(PExpListener v, PApply s) {
-                v.fencepostPostfixPApply(s);
+                v.beginMixfixPApply(s);
             }
 
             @Override
             protected void endAccept(PExpListener v, PApply s) {
-                v.endPostfixPApply(s);
+                v.endMixfixPApply(s);
             }
         },
         /**
@@ -116,20 +97,15 @@ public class PApply extends PExp {
          */
         OUTFIX {
             @Override
-            protected String toString(PApply s) {
+            protected String toString(PApply s, boolean parenthesizeApps) {
                 assert s.functionPortion instanceof PSymbol;
                 PSymbol f = (PSymbol) s.functionPortion;
-                return f.getLeftPrint() + Utils.join(s.arguments, ", ") + f.getRightPrint();
+                return f.getLeftPrint() + pexpJoin(s.arguments, parenthesizeApps) + f.getRightPrint();
             }
 
             @Override
             protected void beginAccept(PExpListener v, PApply s) {
                 v.beginOutfixPApply(s);
-            }
-
-            @Override
-            protected void fencepostAccept(PExpListener v, PApply s) {
-                v.fencepostOutfixPApply(s);
             }
 
             @Override
@@ -139,25 +115,22 @@ public class PApply extends PExp {
         };
 
         /**
-         * Returns a well formatted string representation of this application style.
+         * Returns a well formatted string representation of this app style.
          *
-         * @param s some application
+         * @param s some app
          * @return a string representation.
          */
-        protected abstract String toString(PApply s);
+        protected abstract String toString(PApply s, boolean parenthesizeApps);
 
         /** Triggers a visit at the start when we first encounter {@code s}. */
         protected abstract void beginAccept(PExpListener v, PApply s);
-
-        /** Triggers a visit in the 'middle'; for internal nodes of {@code s}. */
-        protected abstract void fencepostAccept(PExpListener v, PApply s);
 
         /** Triggers at the 'end' when we're about to leave {@code s}. */
         protected abstract void endAccept(PExpListener v, PApply s);
     }
 
     /**
-     * Represents the 'first class function' this application is referencing. Note that the type of
+     * Represents the 'first class function' this app is referencing. Note that the type of
      * {@code functionPortion} can be considered independent of the types of the formals (which are rightly
      * embedded here in the argument {@code PExp}s).
      * <p>
@@ -283,7 +256,9 @@ public class PApply extends PExp {
 
     @Override
     protected void splitIntoConjuncts(@NotNull List<PExp> accumulator) {
-        if (arguments.size() == 2 && functionPortion.getTopLevelOperationName().equals("and")) {
+        if (arguments.size() == 2 &&
+                (functionPortion.getTopLevelOperationName().equals("and") ||
+                        functionPortion.getTopLevelOperationName().equals("∧"))) {
             arguments.get(0).splitIntoConjuncts(accumulator);
             arguments.get(1).splitIntoConjuncts(accumulator);
         }
@@ -294,30 +269,16 @@ public class PApply extends PExp {
 
     @Override
     public PExp withVCInfo(@Nullable Token location, @Nullable String explanation) {
-        return new PApplyBuilder(this).vcInfo(location, explanation).build();
-    }
+        PExp name = functionPortion.withVCInfo(location, explanation);
+        //distribute vc info down into subexps
+        PApplyBuilder builder = new PApplyBuilder(name).vcInfo(location, explanation)
+                .applicationType(getMathClssftn())
+                .style(displayStyle);
 
-    @NotNull
-    public List<PExp> split(PExp assumptions) {
-        List<PExp> result = new ArrayList<>();
-        DumbMathClssftnHandler g = getMathClssftn().getTypeGraph();
-        if (getTopLevelOperationName().equals("and")) {
-            arguments.forEach(a -> result.addAll(a.split(assumptions)));
+        for (PExp e : getArguments()) {
+            builder.arguments(e.withVCInfo(location, explanation));
         }
-        else if (getTopLevelOperationName().equals("implies")) {
-            PExp tempLeft, tempRight;
-            tempLeft = g.formConjuncts(arguments.get(0).splitIntoConjuncts());
-            //tempList = arguments.get(0).split(assumptions);
-            if (!assumptions.isObviouslyTrue()) {
-                tempLeft = g.formConjunct(assumptions, tempLeft);
-            }
-            tempRight = g.formConjuncts(arguments.get(1).splitIntoConjuncts());
-            return arguments.get(1).split(tempLeft);
-        }
-        else {
-            result.add(g.formImplies(assumptions, this));
-        }
-        return result;
+        return builder.build();
     }
 
     @NotNull
@@ -377,6 +338,25 @@ public class PApply extends PExp {
         return result;
     }
 
+
+    @NotNull
+    @Override
+    public Set<PSymbol> getFreeVariablesNoCache() {
+        Set<PSymbol> result = new HashSet<>();
+        Utils.apply(getSubExpressions(), result, PExp::getFreeVariables);
+        return result;
+    }
+
+    @Override
+    public PExp withPrimeMarkAdded() {
+        return new PApplyBuilder(functionPortion.withPrimeMarkAdded())
+                .arguments(arguments)
+                .applicationType(getMathClssftn())
+                .vcInfo(getVCLocation(), getVCExplanation())
+                .style(displayStyle)
+                .build();
+    }
+
     @Override
     public void accept(PExpListener v) {
         v.beginPExp(this);
@@ -385,13 +365,8 @@ public class PApply extends PExp {
 
         v.beginChildren(this);
         functionPortion.accept(v);
-        boolean first = true;
+
         for (PExp arg : arguments) {
-            if (!first) {
-                displayStyle.fencepostAccept(v, this);
-                v.fencepostPApply(this);
-            }
-            first = false;
             arg.accept(v);
         }
         v.endChildren(this);
@@ -445,9 +420,36 @@ public class PApply extends PExp {
         return result;
     }
 
+    //default toString is conservative in that it places many parentheses
     @Override
     public String toString() {
-        return displayStyle.toString(this);
+        return displayStyle.toString(this, true);
+    }
+
+    //default
+    @Override
+    public String toString(boolean parenthesizeApplications) {
+        return displayStyle.toString(this, parenthesizeApplications);
+    }
+
+    @Override
+    public String render() {
+        return super.render();
+    }
+    @NotNull
+    protected static String pexpJoin(@NotNull Collection<PExp> exps, boolean parenthesizeApplications) {
+        String result = "";
+        boolean first = true;
+        for (PExp e : exps) {
+            if (first) {
+                result += e.toString(parenthesizeApplications);
+                first = false;
+            }
+            else {
+                result += ", " + e.toString(parenthesizeApplications);
+            }
+        }
+        return result;
     }
 
     /**
@@ -464,15 +466,17 @@ public class PApply extends PExp {
         protected Token vcLocation;
         protected String vcExplanation;
 
-        protected MathClassification applicationType;
+        protected MathClssftn applicationType;
         protected DisplayStyle displayStyle = DisplayStyle.PREFIX;
+
+        //TODO: Bracket based app should have a left and right...
         protected boolean bracketApp = false;
 
         /**
-         * Constructor for converting an existing function application back into a buildable format. This is useful
+         * Constructor for converting an existing function app back into a buildable format. This is useful
          * for adding (or editing) some information in an existing {@link PApply} instance.
          *
-         * @param e The existing application.
+         * @param e The existing app.
          */
         public PApplyBuilder(@NotNull PApply e) {
             this.functionPortion = e.functionPortion;
@@ -505,7 +509,7 @@ public class PApply extends PExp {
             return this;
         }
 
-        public PApplyBuilder applicationType(@Nullable MathClassification type) {
+        public PApplyBuilder applicationType(@Nullable MathClssftn type) {
             this.applicationType = type;
             return this;
         }

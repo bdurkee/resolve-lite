@@ -95,9 +95,9 @@ public enum ErrorKind {
     NO_SUCH_MATH_FUNCTION(15, "no such function: <arg>", ErrorSeverity.ERROR),
 
     APPLYING_NON_FUNCTION(16, "<arg> is used in the context of a function" +
-            " application, but it isn't a function", ErrorSeverity.ERROR),
+            " app, but it isn't a function", ErrorSeverity.ERROR),
 
-    INCORRECT_FUNCTION_ARG_COUNT(17, "no such math function: <arg>" +
+    INCORRECT_FUNCTION_ARG_COUNT(17, "no such mathFor function: <arg>" +
             "; number of actual args-to-formal args differ", ErrorSeverity.ERROR),
 
     ILLEGAL_IMPLICIT_CLSSFTN_PARAM(62, "the implicit classification parameter" +
@@ -148,10 +148,10 @@ public enum ErrorKind {
     /**
      * Compiler Error 31:
      * <p>
-     * no mapping to template name for output model class <em>class</em>.</p>
+     * no mapping to template name for output stats class <em>class</em>.</p>
      */
     NO_MODEL_TO_TEMPLATE_MAPPING(31, "no mapping to template name for output "
-            + "model class <arg>", ErrorSeverity.ERROR),
+            + "stats class <arg>", ErrorSeverity.ERROR),
 
     /**
      * Compiler Error 32: missing code generation template <em>template</em>.
@@ -217,7 +217,7 @@ public enum ErrorKind {
 
     INCOMPATIBLE_OP_TYPES(42, "incompatible types on <arg> found: [<arg2>, <arg3>]; these need to be the same types", ErrorSeverity.ERROR),
 
-    MISSING_RETURN_STMT(43, "operation/procedure: <arg> is missing a return assignment stmt (e.g.: the concluding " +
+    MISSING_RETURN_STMT(43, "operation/procedure: <arg> is missing a return assignment stmt (e.g.: the last " +
             "statement should be <arg> := [SOME RETURN VALUE];", ErrorSeverity.ERROR),
 
     ILLEGAL_INCOMING_REF_IN_REQUIRES(44, "found illegal '@'-valued variable ref(s): [<arg; separator={, }>] in " +
@@ -246,7 +246,9 @@ public enum ErrorKind {
 
     VC_MISSING_LOCATION_INFO(67, "dropped vc; the consequent: <arg> is missing location info", ErrorSeverity.WARNING),
 
-    BAD_FROM_CLAUSE(68, "from clause '<arg>' doesn't exist, isn't a directory, and/or isn't a valid project root", ErrorSeverity.ERROR);
+    BAD_FROM_CLAUSE(68, "from clause '<arg>' doesn't exist, isn't a directory, and/or isn't a valid project root", ErrorSeverity.ERROR),
+
+    AMBIGUOUS_FACILITY(69, "multiple valid facilities found for symbol: <arg>, consider qualifying", ErrorSeverity.WARNING);
 
     public final int code;
     public final String message;

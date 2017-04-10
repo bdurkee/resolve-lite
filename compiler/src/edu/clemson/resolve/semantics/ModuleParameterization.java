@@ -1,6 +1,7 @@
 package edu.clemson.resolve.semantics;
 
 import edu.clemson.resolve.parser.ResolveParser;
+import edu.clemson.resolve.semantics.programtype.ProgInvalidType;
 import org.jetbrains.annotations.NotNull;
 import edu.clemson.resolve.semantics.programtype.ProgType;
 import edu.clemson.resolve.semantics.symbol.*;
@@ -75,19 +76,25 @@ public class ModuleParameterization {
             }
         }
         if (formalGenerics.size() != actualGenerics.size()) {
+
             //we shouldn't have to do this in here I don't think. Can't really
             //give a nice error (no pointer to errMgr here), and we can't throw
             // an exception to be caught
             //in the populator -- unless of course adding yet another caught
             //exception to the signature of Scope.* methods sounds appealing...
             //which it certainly doesn't.
-            throw new RuntimeException("generic list sizes do not match");
+            //throw new RuntimeException("generic list sizes do not match");
         }
-        Iterator<ProgTypeSymbol> suppliedGenericIter =
-                actualGenerics.iterator();
+        Iterator<ProgTypeSymbol> suppliedGenericIter = actualGenerics.iterator();
         for (ProgParameterSymbol formalGeneric : formalGenerics) {
-            result.put(formalGeneric.getName(), suppliedGenericIter
-                    .next().getProgramType());
+            ProgType suppliedGeneric = null;
+            if (suppliedGenericIter.hasNext()) {
+                suppliedGeneric = suppliedGenericIter.next().getProgramType();
+            }
+            else {
+                suppliedGeneric = ProgInvalidType.getInstance(formalGeneric.getDeclaredType().getTypeGraph());
+            }
+            result.put(formalGeneric.getName(), suppliedGeneric);
         }
         return result;
     }

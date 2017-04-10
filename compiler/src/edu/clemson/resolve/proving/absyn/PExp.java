@@ -5,9 +5,10 @@ import edu.clemson.resolve.misc.Utils;
 import org.antlr.v4.runtime.Token;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import edu.clemson.resolve.semantics.MathClassification;
+import edu.clemson.resolve.semantics.MathClssftn;
 import edu.clemson.resolve.semantics.Quantification;
 import edu.clemson.resolve.semantics.programtype.ProgType;
+import org.stringtemplate.v4.ST;
 
 import java.util.*;
 
@@ -34,7 +35,7 @@ public abstract class PExp {
     public final int structureHash, valueHash;
 
     /** Backing field for {@link #getMathClssftn()} */
-    private final MathClassification type;
+    private final MathClssftn type;
 
     /**
      * Since the removal of the Exp hierarchy, the role of {@code PExps} has expanded considerably.
@@ -46,30 +47,31 @@ public abstract class PExp {
 
     private List<PExp> cachedFunctionApplications = null;
     private Set<PSymbol> cachedQuantifiedVariables = null;
+    private Set<PSymbol> cachedFreeVariables = null;
     private Set<PSymbol> cachedIncomingVariables = null;
 
-    public PExp(@NotNull PSymbol.HashDuple hashes, @NotNull MathClassification type) {
+    public PExp(@NotNull PSymbol.HashDuple hashes, @NotNull MathClssftn type) {
         this(hashes.structureHash, hashes.valueHash, type, null);
     }
 
-    public PExp(@NotNull PSymbol.HashDuple hashes, @NotNull MathClassification type, @Nullable ProgType progType,
+    public PExp(@NotNull PSymbol.HashDuple hashes, @NotNull MathClssftn type, @Nullable ProgType progType,
                 @Nullable Token vcLocation, @Nullable String vcExplanation) {
         this(hashes.structureHash, hashes.valueHash, type, progType, vcLocation, vcExplanation);
     }
 
-    public PExp(@NotNull PSymbol.HashDuple hashes, @NotNull MathClassification type, @Nullable ProgType progType) {
+    public PExp(@NotNull PSymbol.HashDuple hashes, @NotNull MathClssftn type, @Nullable ProgType progType) {
         this(hashes.structureHash, hashes.valueHash, type, progType);
     }
 
-    public PExp(int structureHash, int valueHash, @NotNull MathClassification type) {
+    public PExp(int structureHash, int valueHash, @NotNull MathClssftn type) {
         this(structureHash, valueHash, type, null);
     }
 
-    public PExp(int structureHash, int valueHash, @NotNull MathClassification type, @Nullable ProgType progType) {
+    public PExp(int structureHash, int valueHash, @NotNull MathClssftn type, @Nullable ProgType progType) {
         this(structureHash, valueHash, type, progType, null, null);
     }
 
-    public PExp(int structureHash, int valueHash, @NotNull MathClassification type,
+    public PExp(int structureHash, int valueHash, @NotNull MathClssftn type,
                 @Nullable ProgType progType, @Nullable Token vcLocation, @Nullable String vcExplanation) {
         this.type = type;
         this.progType = progType;
@@ -90,7 +92,7 @@ public abstract class PExp {
     }
 
     @NotNull
-    public final MathClassification getMathClssftn() {
+    public final MathClssftn getMathClssftn() {
         return type;
     }
 
@@ -145,21 +147,23 @@ public abstract class PExp {
         return substitute(e);
     }
 
+    public abstract PExp withPrimeMarkAdded();
+
     /**
-     * Returns true if the {@link MathClassification} of this expression matches (or is a subtype) of {@code other};
+     * Returns true if the {@link MathClssftn} of this expression matches (or is a subtype) of {@code other};
      * {@code false} otherwise.
      *
      * @param other some {@code MathClassification}.
      *
-     * @return whether or not the math types of this or {@code other} matches
+     * @return whether or not the mathFor types of this or {@code other} matches
      */
-    public boolean typeMatches(MathClassification other) {
+    public boolean typeMatches(MathClssftn other) {
         //return other.isSubtypeOf(getClassification());
         return true;
     }
 
     /**
-     * @see PExp#typeMatches(MathClassification)
+     * @see PExp#typeMatches(MathClssftn)
      */
     public boolean typeMatches(PExp other) {
         return typeMatches(other.getMathClssftn());
@@ -209,7 +213,7 @@ public abstract class PExp {
      * A predicate that returns {@code true} in any of the following cases:
      * <ul>
      * <li>If we're an instance of {@code PSymbol} whose name is simply {@code true}.</li>
-     * <li>If we're an expression with a top level application of of binary {@code =}s whose left and right arguments
+     * <li>If we're an expression with a top level app of of binary {@code =}s whose left and right arguments
      * are themselves equal (as determined via a call to {@link PExp#equals(Object)}).</li>
      * </ul>;
      *
@@ -220,10 +224,10 @@ public abstract class PExp {
     }
 
     /**
-     * Returns {@code true} if this {@code PExp} represents a primitive application of the {@code =} operator;
+     * Returns {@code true} if this {@code PExp} represents a primitive app of the {@code =} operator;
      * {@code false} otherwise.
      *
-     * @return whether or not we have represent a top-level application of equals
+     * @return whether or not we have represent a top-level app of equals
      */
     public boolean isEquality() {
         return false;
@@ -247,6 +251,10 @@ public abstract class PExp {
         return false;
     }
 
+    public boolean isLiteralTrue() {
+        return false;
+    }
+
     public boolean isVariable() {
         return false;
     }
@@ -258,7 +266,7 @@ public abstract class PExp {
      * If {@code this} expression is anonoymous, then we simply return a canned string such as <code>\:PLamda</code>
      * or <code>{ PSet }</code>.</p>
      * <p>
-     * If your dealing with a curried style top-level application of the form {@code SS(k)(Cen(k))}, then the canonical
+     * If your dealing with a curried style top-level app of the form {@code SS(k)(Cen(k))}, then the canonical
      * name returned should simply be <tt>SS</tt>.</p>
      *
      * @return the canonical name
@@ -267,8 +275,8 @@ public abstract class PExp {
     public abstract String getTopLevelOperationName();
 
     /**
-     * Returns {@code true} iff this expression represents a primitive such as
-     * {@code 1..n} or some boolean value; {@code false} otherwise.
+     * Returns {@code true} iff this expression represents a primitive such as {@code 1..n} or some boolean value;
+     * {@code false} otherwise.
      *
      * @return whether or not this
      */
@@ -285,26 +293,6 @@ public abstract class PExp {
         Set<String> othersNames = other.getSymbolNames(excludeApplication, excludeLiterals);
         myNames.retainAll(othersNames);
         return !myNames.isEmpty();
-    }
-
-    /**
-     * Converts {@code this} expression, containing an arbitrary number of
-     * conjuncts with possibly nested implications, into a list of sequents.
-     *
-     * @return a list of sequents derived from {@code this}
-     */
-    @NotNull
-    public List<PExp> split() {
-        return split(getMathClssftn().getTypeGraph().getTrueExp());
-    }
-
-    /**
-     * A protected refinement of {@link PExp#split()} that adds an
-     * accumulator, {@code assumptions}, for developing our sequents.
-     */
-    @NotNull
-    protected List<PExp> split(PExp assumtions) {
-        return new ArrayList<>();
     }
 
     @NotNull
@@ -368,7 +356,7 @@ public abstract class PExp {
     public abstract Set<PSymbol> getQuantifiedVariablesNoCache();
 
     //TODO: Consider making this List<PApply>.. but what about lambdas, isn't
-    //that a function application? Just a nameless function application?
+    //that a function app? Just a nameless function app?
     @NotNull
     public final List<PExp> getFunctionApplications() {
         if (cachedFunctionApplications == null) {
@@ -380,6 +368,18 @@ public abstract class PExp {
 
     @NotNull
     public abstract List<PExp> getFunctionApplicationsNoCache();
+
+    @NotNull
+    public final Set<PSymbol> getFreeVariables() {
+        if (cachedFreeVariables == null) {
+            //We're immutable, so only do this once
+            cachedFreeVariables = Collections.unmodifiableSet(getFreeVariablesNoCache());
+        }
+        return cachedFreeVariables;
+    }
+
+    @NotNull
+    public abstract Set<PSymbol> getFreeVariablesNoCache();
 
     @NotNull
     public final Set<String> getSymbolNames() {
@@ -404,22 +404,21 @@ public abstract class PExp {
     @Override
     public abstract boolean equals(Object o);
 
-    /**
-     * Returns a map of equalities contained in the top level of {@code this} of the form:
-     * {@code [variable name] = [some expr]}.
-     *
-     * @return pairs of variable equalities in {@code this}.
-     */
-    public Map<String, PExp> getTopLevelVariableEqualities() {
-        Map<String, PExp> result = new HashMap<>();
-        for (PExp v : this.splitIntoConjuncts()) {
-            if (v.isEquality() &&
-                    v.getSubExpressions().get(1).isVariable()) {
-                result.put(v.getSubExpressions().get(1).getTopLevelOperationName(),
-                        v.getSubExpressions().get(2));
-            }
-        }
-        return result;
+    //default
+    public String toString(boolean parenthesizeApplications) {
+        return toString();
+    }
+
+    public String render(int lineWidth) {
+        PExpTextRenderingListener l = new PExpTextRenderingListener(lineWidth);
+        accept(l);
+        ST result = l.getSTFor(this);
+        String s = result.render(lineWidth);
+        return s;
+    }
+
+    public String render() {
+        return render(35);
     }
 
     /** A util container for storing node structural and value hashcodes. */

@@ -1,53 +1,29 @@
 package edu.clemson.resolve.vcgen;
 
-import edu.clemson.resolve.codegen.model.OutputModelObject;
-import edu.clemson.resolve.proving.Antecedent;
-import edu.clemson.resolve.proving.Consequent;
+import edu.clemson.resolve.misc.Utils;
 import edu.clemson.resolve.proving.absyn.PExp;
 import org.antlr.v4.runtime.Token;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.IllegalFormatException;
-import java.util.List;
+import java.util.Iterator;
 
-/** Represents an immutable vc (verification condition), which takes the form of a mathematical implication. */
-public final class VC extends OutputModelObject {
+/**
+ * A simple wrapper class that pairs a sequent with additional information such as location,
+ * vc explanation, line number, etc.
+ */
+public final class VC {
 
     /** A human-readable name for the VC; used for debugging purposes. */
-    private final int number;
-    private final String explanation;
-
     private final Token location;
+    private final String explanation;
+    private final Sequent sequent;
+    private final int number;
 
-    private final Antecedent antecedent;
-    private final Consequent consequent;
-
-    public VC(int number, PExp antecedent, PExp consequent) {
-        this(number, new Antecedent(antecedent), new Consequent(consequent));
-    }
-
-    public VC(int number, Antecedent antecedent, Consequent consequent) {
+    public VC(Token location, int number, String explanation, @NotNull Sequent sequent) {
+        this.sequent = sequent;
+        this.location = location;
+        this.explanation = explanation;
         this.number = number;
-        this.antecedent = antecedent;
-        this.consequent = consequent;
-
-        if (consequent.size() != 1) {
-            throw new UnsupportedOperationException("Only VCs with a single consequent are supported at the moment, " +
-                    "the {@link PExp:split()} method is likely at fault here");
-        }
-        PExp consequentExp = consequent.get(0);
-        this.explanation = consequentExp.getVCExplanation();
-        this.location = consequentExp.getVCLocation();
-    }
-
-    public int getNumber() {
-        return number;
-    }
-
-    @NotNull
-    public String getExplanation() {
-        return explanation;
     }
 
     @NotNull
@@ -56,19 +32,71 @@ public final class VC extends OutputModelObject {
     }
 
     @NotNull
-    public Antecedent getAntecedent() {
-        return antecedent;
+    public String getExplanation() {
+        return explanation;
+    }
+
+    public int getNumber() {
+        return number;
     }
 
     @NotNull
-    public Consequent getConsequent() {
-        return consequent;
+    public Sequent getSequent() {
+        return sequent;
     }
 
-    /*@Override public String toString() {
-        String retval =
-                "========== " + getNameToken() + " ==========\n" + antecedent
-                            + "  -->\n" + consequent;
+    public boolean isObviouslyTrue() {
+        for (PExp e : sequent.getRightFormulas()) {
+            if (!e.isLiteralTrue()) return false;
+        }
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        return sequent.toString().hashCode();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        boolean result = (o instanceof VC);
+        if (result) {
+            result = location.getLine() == ((VC)o).location.getLine() &&
+                    explanation.equals(((VC) o).explanation) &&
+                    sequent.equals(((VC) o).sequent);
+        }
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        return toString(35);
+    }
+
+    public String toString(int lineWidth) {
+        String retval = "//Vc #" + number + ": " + explanation + " (" + location.getLine() + ")" + "\n";
+        int i = 1;
+        boolean first = true;
+        for (PExp e : sequent.getLeftFormulas()) {
+            if (first) {
+                retval += e.render(lineWidth);
+                first = false;
+            }
+            else {
+                retval += ",\n" + e.render(lineWidth);
+            }
+        }
+        retval += "\n⊢\n";
+        first = true;
+        for (PExp e : sequent.getRightFormulas()) {
+            if (first) {
+                retval += e.render(lineWidth);
+                first = false;
+            }
+            else {
+                retval += ",\n" + e.render(lineWidth);
+            }
+        }
         return retval;
-    }*/
+    }
 }

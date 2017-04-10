@@ -27,9 +27,7 @@ public class TestASTStructure extends BaseTest {
     private static String getClassStr(PExp exp) {
         String className = exp.getClass().getSimpleName();
         if ( !(exp instanceof PApply) ) return className;
-        return className + ":" +
-                (((PApply) exp).getDisplayStyle()).toString()
-                        .toLowerCase() + className;
+        return className + ":" + (((PApply) exp).getDisplayStyle()).toString().toLowerCase() + className;
     }
 
     @Test
@@ -51,7 +49,7 @@ public class TestASTStructure extends BaseTest {
                         "<PApply:infixPApply:end>:(1 * y)\n" +
                         "<PApply:infixPApply:end>:(x + (1 * y))\n"
         };
-        PExp tree = TestPExp.parseMathAssertionExp(g, "x + 1 * y");
+        PExp tree = TestPExp.parseMathAssertionExp(g, "x + (1 * y)");
         TestListener v = new TestListener();
         tree.accept(v);
         Assert.assertEquals(expected[0], v.trace);

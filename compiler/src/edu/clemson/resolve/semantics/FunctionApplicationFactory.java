@@ -6,8 +6,8 @@ import java.util.List;
 
 public interface FunctionApplicationFactory {
 
-    public MathClassification buildFunctionApplication(@NotNull DumbMathClssftnHandler g,
-                                                       @NotNull MathFunctionClassification f,
-                                                       @NotNull String calledAsName,
-                                                       @NotNull List<MathClassification> arguments);
+    public MathClssftn buildFunctionApplication(@NotNull DumbMathClssftnHandler g,
+                                                @NotNull MathFunctionClssftn f,
+                                                @NotNull String calledAsName,
+                                                @NotNull List<MathClssftn> arguments);
 }

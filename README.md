@@ -103,16 +103,8 @@ in the previous section.
 Now that we have the compiler setup, go ahead create a new file called
 `Hello.resolve` and punch in the following bit of RESOLVE:
 
-```
-Facility Hello;
-        uses Standard_Char_Strings;
+![hello_world_code](doc/images/01.png)
 
-    Operation Main();
-        Procedure
-            Std_Char_Str_Fac :: Write_Line("hello world!");
-        end Main;
-end Hello;
-```
 To run, open the terminal, cd to the directory where you've
 saved the file and classification:
 
@@ -122,6 +114,7 @@ resolve Hello.resolve -genCode Java -jar
 
 The compiler will do some thinking, and eventually produce `Hello.jar`, which
 is run as follows:
+
 ```
 $java -jar Hello.jar
 >hello world!

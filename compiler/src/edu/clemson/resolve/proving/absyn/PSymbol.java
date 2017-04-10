@@ -4,7 +4,7 @@ import edu.clemson.resolve.misc.Utils;
 import org.jetbrains.annotations.NotNull;
 import org.antlr.v4.runtime.Token;
 import org.jetbrains.annotations.Nullable;
-import edu.clemson.resolve.semantics.MathClassification;
+import edu.clemson.resolve.semantics.MathClssftn;
 import edu.clemson.resolve.semantics.Quantification;
 import edu.clemson.resolve.semantics.DumbMathClssftnHandler;
 import edu.clemson.resolve.semantics.programtype.ProgType;
@@ -99,7 +99,7 @@ public class PSymbol extends PExp {
 
     @Override
     public boolean isVariable() {
-        return !isLiteral();
+        return !isFunctionApplication();
     }
 
     @Override
@@ -116,6 +116,10 @@ public class PSymbol extends PExp {
             result = new PSymbolBuilder(this).build();
         }
         return result;
+    }
+
+    public boolean isLiteralTrue() {
+        return name.equals("true");
     }
 
     @Override
@@ -153,6 +157,12 @@ public class PSymbol extends PExp {
     }
 
     @Override
+    @NotNull
+    public PExp withPrimeMarkAdded() {
+        return new PSymbol.PSymbolBuilder(this, getName() + "′").build();
+    }
+
+    @Override
     public void accept(PExpListener v) {
         v.beginPExp(this);
         v.beginPSymbol(this);
@@ -174,6 +184,7 @@ public class PSymbol extends PExp {
     @Override
     public PExp withQuantifiersFlipped() {
         return new PSymbolBuilder(this)
+                .vcInfo(getVCLocation(), getVCExplanation())
                 .quantification(quantification.flipped())
                 .build();
     }
@@ -220,6 +231,16 @@ public class PSymbol extends PExp {
         return new LinkedList<>();
     }
 
+    @NotNull
+    @Override
+    public Set<PSymbol> getFreeVariablesNoCache() {
+        Set<PSymbol> result = new LinkedHashSet<>();
+        if (quantification == Quantification.NONE) {
+            result.add(this);
+        }
+        return result;
+    }
+
     @Override
     public boolean equals(Object o) {
         boolean result = (o instanceof PSymbol);
@@ -239,7 +260,7 @@ public class PSymbol extends PExp {
     @Override
     public String toString() {
         String result = "";
-        if (incomingFlag) result += "@";
+        if (incomingFlag) result += "#";
         if (leftPrint != null && rightPrint != null) {
             result = leftPrint + result + rightPrint;
         }
@@ -259,7 +280,7 @@ public class PSymbol extends PExp {
         protected boolean incoming = false;
         protected boolean literal = false;
         protected Quantification quantification = Quantification.NONE;
-        protected MathClassification mathType, mathTypeValue;
+        protected MathClssftn mathType, mathTypeValue;
         protected ProgType progType, progTypeValue;
         protected Token vcLocation;
         protected String vcExplanation;
@@ -291,6 +312,9 @@ public class PSymbol extends PExp {
 
             this.mathType = existingPSymbol.getMathClssftn();
             this.progType = existingPSymbol.getProgType();
+
+            this.vcLocation = existingPSymbol.getVCLocation();
+            this.vcExplanation = existingPSymbol.getVCExplanation();
         }
 
         public PSymbolBuilder(String name) {
@@ -334,7 +358,7 @@ public class PSymbol extends PExp {
             return this;
         }
 
-        public PSymbolBuilder mathClssfctn(MathClassification e) {
+        public PSymbolBuilder mathClssfctn(MathClssftn e) {
             this.mathType = e;
             return this;
         }

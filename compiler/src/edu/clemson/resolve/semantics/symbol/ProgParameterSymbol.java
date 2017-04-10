@@ -1,5 +1,6 @@
 package edu.clemson.resolve.semantics.symbol;
 
+import edu.clemson.resolve.proving.absyn.PSelector;
 import edu.clemson.resolve.proving.absyn.PSymbol;
 import edu.clemson.resolve.semantics.*;
 import org.jetbrains.annotations.NotNull;
@@ -127,7 +128,7 @@ public class ProgParameterSymbol extends Symbol {
             int level = type.toMath().getTypeRefDepth();
             this.mathSymbolAlterEgo =
                     new MathClssftnWrappingSymbol(g, name, Quantification.NONE,
-                            new MathNamedClassification(g, name, level, type.toMath()),
+                            new MathNamedClssftn(g, name, level, type.toMath()),
                             definingTree, moduleIdentifier);
         }
         this.progVariableAlterEgo =
@@ -199,6 +200,20 @@ public class ProgParameterSymbol extends Symbol {
     }
 
     @NotNull
+    public PSelector asConceptualSymbol() {
+        return asConceptualSymbol(false);
+    }
+
+    @NotNull
+    public PSelector asConceptualSymbol(boolean incoming) {
+        return new PSelector(
+                new PSymbol.PSymbolBuilder("conc").mathClssfctn(typeGraph.BOOLEAN)
+                        .incoming(incoming).build(),
+                new PSymbol.PSymbolBuilder(getName())
+                        .mathClssfctn(declaredType.toMath()).build());
+    }
+
+    @NotNull
     @Override
     public String getSymbolDescription() {
         return "a parameter";
@@ -206,10 +221,8 @@ public class ProgParameterSymbol extends Symbol {
 
     @NotNull
     @Override
-    public Symbol instantiateGenerics(
-            @NotNull Map<String, ProgType> genericInstantiations,
-            @Nullable FacilitySymbol instantiatingFacility) {
-
+    public Symbol instantiateGenerics(@NotNull Map<String, ProgType> genericInstantiations,
+                                      @Nullable FacilitySymbol instantiatingFacility) {
         return new ProgParameterSymbol(typeGraph, getName(), mode,
                 declaredType.instantiateGenerics(genericInstantiations,
                         instantiatingFacility), getDefiningTree(), getModuleIdentifier());
