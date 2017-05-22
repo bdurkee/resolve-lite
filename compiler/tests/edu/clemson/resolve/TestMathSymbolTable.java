@@ -46,7 +46,7 @@ public class TestMathSymbolTable extends BaseTest {
 
         AnnotatedModule m = buildDummyModule("Precis Foo;\n end Foo;");
         b.startModuleScope(m);
-        b.endScope();
+        b.closeScope();
 
         ModuleScopeBuilder s = b.getModuleScope("Foo");
         Assert.assertTrue(s.getDefiningTree() == m.getRoot());
@@ -60,7 +60,7 @@ public class TestMathSymbolTable extends BaseTest {
 
         AnnotatedModule m = buildDummyModule("Precis Foo;\n end Foo;");
         b.startModuleScope(m);
-        b.endScope();
+        b.closeScope();
 
         ModuleScopeBuilder s = b.getModuleScope("Foo");
         b.getInnermostActiveScope();
@@ -75,7 +75,7 @@ public class TestMathSymbolTable extends BaseTest {
         AnnotatedModule m = buildDummyModule("Precis Foo;\n end Foo;");
         ScopeBuilder s = b.startModuleScope(m);
         s.addBinding("E", myConceptualElement1, myType1);
-        b.endScope();
+        b.closeScope();
 
         MathSymbolTable t = b.seal();
 

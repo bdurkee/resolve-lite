@@ -117,7 +117,7 @@ public class MathClssftnWrappingSymbol extends Symbol {
                 new VariableReplacingVisitor(genericMathematicalInstantiations);
         type.accept(typeSubstitutor);
 
-        MTType instantiatedTypeValue = null;
+        MTEntity instantiatedTypeValue = null;
         if ( typeValue != null ) {
             VariableReplacingVisitor typeValueSubstitutor =
                     new VariableReplacingVisitor(
@@ -126,8 +126,8 @@ public class MathClssftnWrappingSymbol extends Symbol {
             instantiatedTypeValue = typeValueSubstitutor.getFinalExpression();
         }
 
-        Map<String, MTType> newGenericsInDefiningContext =
-                new HashMap<String, MTType>(genericsInDefiningContext);
+        Map<String, MTEntity> newGenericsInDefiningContext =
+                new HashMap<String, MTEntity>(genericsInDefiningContext);
         newGenericsInDefiningContext.keySet().removeAll(
                 genericInstantiations.keySet());
 */

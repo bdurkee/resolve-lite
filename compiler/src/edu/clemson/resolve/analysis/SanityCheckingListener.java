@@ -9,7 +9,7 @@ import org.jetbrains.annotations.NotNull;
 
 /**
  * Uses a combination of listeners and visitors to check for some semantic
- * errors uncheckable in the grammar and ommited by {@link PopulatingVisitor}.
+ * errors uncheckable in the grammar and ommited by {@link ProtoPopulatingVisitor}.
  * <p>
  * To make many of our checks here easier, we make sure to have already built
  * the ast for exprs in a previous phase.</p>

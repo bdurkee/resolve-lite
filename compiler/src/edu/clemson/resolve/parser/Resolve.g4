@@ -87,7 +87,17 @@ precisBlock
         | mathInductiveDefnDecl
         | mathTheoremDecl
         | mathClssftnAssertionDecl
+        | mathRecognitionDecl
         )*
+    ;
+
+mathRecognitionDecl
+    :   'Recognition' name=ID ':'
+        mathQuantifiedTypeExp ';'
+    ;
+
+mathQuantifiedTypeExp
+    :   q=(FORALL|EXISTS) mathVarDeclGroup ',' mathVarDecl
     ;
 
 conceptBlock
